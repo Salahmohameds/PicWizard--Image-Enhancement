@@ -26,6 +26,8 @@ def index():
 def enhance():
     """Process an image using the specified enhancement method"""
     try:
+        logger.debug("Received enhancement request")
+        
         # Check if image file is present in request
         if 'image' not in request.files:
             logger.error("No image file in request")
@@ -33,6 +35,7 @@ def enhance():
         
         file = request.files['image']
         method = request.form.get('method', '')
+        logger.debug(f"Enhancement method requested: {method}")
         
         # Validate file
         if file.filename == '':
@@ -41,11 +44,18 @@ def enhance():
         
         # Read image
         file_bytes = file.read()
-        img = cv2.imdecode(np.frombuffer(file_bytes, np.uint8), cv2.IMREAD_COLOR)
+        logger.debug(f"Read {len(file_bytes)} bytes from uploaded file")
         
-        if img is None:
-            logger.error("Failed to decode image")
-            return jsonify({"error": "Invalid image format"}), 400
+        try:
+            img = cv2.imdecode(np.frombuffer(file_bytes, np.uint8), cv2.IMREAD_COLOR)
+            if img is None:
+                logger.error("Failed to decode image")
+                return jsonify({"error": "Invalid image format"}), 400
+            
+            logger.debug(f"Image successfully decoded. Shape: {img.shape}")
+        except Exception as e:
+            logger.exception("Error during image decoding")
+            return jsonify({"error": f"Image decoding error: {str(e)}"}), 400
         
         # Get parameters and apply enhancement
         params = request.form.to_dict()
@@ -88,4 +98,4 @@ def enhance():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -79,6 +79,8 @@ function setupUploadHandler() {
 
 // Process uploaded file
 function processUploadedFile(file) {
+    console.log("Processing file:", file.name, "Type:", file.type, "Size:", file.size);
+    
     // Validate file type
     if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
         alert('Please upload a valid JPG or PNG image.');
@@ -88,8 +90,19 @@ function processUploadedFile(file) {
     const reader = new FileReader();
     
     reader.onload = function(e) {
+        console.log("File loaded successfully, creating image");
+        
         const img = new Image();
+        
+        // Handle errors
+        img.onerror = function() {
+            console.error("Failed to load image");
+            alert("Failed to load the image. Please try another file.");
+        };
+        
         img.onload = function() {
+            console.log("Image loaded, dimensions:", img.width, "x", img.height);
+            
             // Show editor
             document.getElementById('editor-container').style.display = 'flex';
             
@@ -110,9 +123,16 @@ function processUploadedFile(file) {
             currentImage = img;
         };
         
+        // Set image source from FileReader result
         img.src = e.target.result;
     };
     
+    reader.onerror = function() {
+        console.error("FileReader error:", reader.error);
+        alert("Failed to read the file. Please try again.");
+    };
+    
+    // Read file as data URL
     reader.readAsDataURL(file);
 }
 
@@ -286,14 +306,20 @@ async function applyEnhancement(method, params = {}) {
     processingIndicator.style.display = 'block';
     
     try {
+        console.log(`Applying enhancement: ${method} with params:`, params);
+        
         // Convert canvas to blob
         const blob = await new Promise(resolve => {
             canvas.toBlob(resolve, 'image/png');
         });
         
+        if (!blob) {
+            throw new Error("Failed to create image blob from canvas");
+        }
+        
         // Create form data
         const formData = new FormData();
-        formData.append('image', blob, 'image.png');
+        formData.append('image', blob, 'uploaded_image.png');
         formData.append('method', method);
         
         // Add parameters
@@ -327,7 +353,20 @@ async function applyEnhancement(method, params = {}) {
         updateComparisonSlider();
     } catch (error) {
         console.error('Error applying enhancement:', error);
-        alert(`Error: ${error.message}`);
+        let errorMessage = error.message || 'Unknown error occurred';
+        
+        try {
+            // Try to parse the error if it's a JSON string
+            const errorObj = JSON.parse(errorMessage);
+            if (errorObj.error) {
+                errorMessage = errorObj.error;
+            }
+        } catch (e) {
+            // Not a JSON string, use as is
+        }
+        
+        // Display error message
+        alert(`Error: ${errorMessage}`);
     } finally {
         // Hide processing indicator
         processingIndicator.style.display = 'none';
