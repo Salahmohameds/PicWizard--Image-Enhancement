@@ -81,6 +81,20 @@ def enhance():
         elif method == 'super_resolution':
             scale_factor = int(params.get('scale_factor', 2))
             result = processor.super_resolution(img, scale_factor=scale_factor)
+        elif method == 'color_balance':
+            r_factor = float(params.get('r_factor', 1.0))
+            g_factor = float(params.get('g_factor', 1.0))
+            b_factor = float(params.get('b_factor', 1.0))
+            result = processor.color_balance(img, r_factor=r_factor, g_factor=g_factor, b_factor=b_factor)
+        elif method == 'sepia_filter':
+            intensity = float(params.get('intensity', 0.5))
+            result = processor.sepia_filter(img, intensity=intensity)
+        elif method == 'noise_reduction':
+            strength = int(params.get('strength', 7))
+            result = processor.noise_reduction(img, strength=strength)
+        elif method == 'sharpen':
+            strength = float(params.get('strength', 1.0))
+            result = processor.sharpen(img, strength=strength)
         else:
             logger.error(f"Unknown method: {method}")
             return jsonify({"error": f"Unknown enhancement method: {method}"}), 400

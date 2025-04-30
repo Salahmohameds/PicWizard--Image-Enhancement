@@ -167,3 +167,98 @@ class ImageProcessor:
         
         # Resize with cubic interpolation (better quality than linear)
         return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
+    
+    def color_balance(self, img, r_factor=1.0, g_factor=1.0, b_factor=1.0):
+        """
+        Adjust RGB color channels independently
+        
+        Args:
+            img: Input image (BGR format)
+            r_factor: Red channel multiplier
+            g_factor: Green channel multiplier
+            b_factor: Blue channel multiplier
+            
+        Returns:
+            Color balanced image
+        """
+        # Split the image into BGR channels
+        b, g, r = cv2.split(img)
+        
+        # Apply multipliers to each channel
+        r = np.clip(r * r_factor, 0, 255).astype(np.uint8)
+        g = np.clip(g * g_factor, 0, 255).astype(np.uint8)
+        b = np.clip(b * b_factor, 0, 255).astype(np.uint8)
+        
+        # Merge the channels back
+        return cv2.merge([b, g, r])
+    
+    def sepia_filter(self, img, intensity=0.5):
+        """
+        Apply sepia tone effect for a vintage look
+        
+        Args:
+            img: Input image
+            intensity: Strength of sepia effect (0-1)
+            
+        Returns:
+            Sepia-toned image
+        """
+        # Convert to float to avoid overflow
+        img_float = img.astype(float) / 255.0
+        
+        # Sepia matrix
+        sepia_matrix = np.array([
+            [0.393, 0.769, 0.189],
+            [0.349, 0.686, 0.168],
+            [0.272, 0.534, 0.131]
+        ])
+        
+        # Convert to sepia
+        sepia_img = np.zeros_like(img_float)
+        for i in range(3):
+            sepia_img[:,:,i] = np.sum(img_float * sepia_matrix[i], axis=2)
+        
+        # Clip values to valid range
+        sepia_img = np.clip(sepia_img, 0, 1)
+        
+        # Blend with original based on intensity
+        blended = cv2.addWeighted(img_float, 1 - intensity, sepia_img, intensity, 0)
+        
+        # Convert back to uint8
+        return (blended * 255).astype(np.uint8)
+    
+    def noise_reduction(self, img, strength=7):
+        """
+        Apply noise reduction using Non-Local Means Denoising
+        
+        Args:
+            img: Input image
+            strength: Strength of noise reduction (higher values = more smoothing)
+            
+        Returns:
+            Denoised image
+        """
+        # Apply Non-Local Means Denoising
+        return cv2.fastNlMeansDenoisingColored(img, None, strength, strength, 7, 21)
+    
+    def sharpen(self, img, strength=1.0):
+        """
+        Sharpen image using an unsharp mask with predefined parameters
+        
+        Args:
+            img: Input image
+            strength: Sharpen strength multiplier
+            
+        Returns:
+            Sharpened image
+        """
+        # Define sharpening kernel
+        kernel = np.array([[-1, -1, -1],
+                          [-1, 9 + strength, -1],
+                          [-1, -1, -1]], dtype=np.float32)
+        
+        # Apply kernel
+        sharpened = cv2.filter2D(img, -1, kernel)
+        
+        # Ensure values are in valid range
+        return np.clip(sharpened, 0, 255).astype(np.uint8)

@@ -238,6 +238,92 @@ function setupEnhancementButtons() {
         const scaleFactor = parseInt(document.querySelector('input[name="scale-factor"]:checked').value);
         applyEnhancement('super_resolution', { scale_factor: scaleFactor });
     });
+    
+    // Color Balance
+    document.getElementById('color-balance-btn').addEventListener('click', function() {
+        const rFactor = parseFloat(document.getElementById('red-slider').value);
+        const gFactor = parseFloat(document.getElementById('green-slider').value);
+        const bFactor = parseFloat(document.getElementById('blue-slider').value);
+        applyEnhancement('color_balance', { 
+            r_factor: rFactor,
+            g_factor: gFactor,
+            b_factor: bFactor
+        });
+    });
+    
+    // Update color balance slider values
+    document.getElementById('red-slider').addEventListener('input', function() {
+        document.getElementById('red-value').textContent = this.value;
+    });
+    
+    document.getElementById('green-slider').addEventListener('input', function() {
+        document.getElementById('green-value').textContent = this.value;
+    });
+    
+    document.getElementById('blue-slider').addEventListener('input', function() {
+        document.getElementById('blue-value').textContent = this.value;
+    });
+    
+    // Real-time color balance (preview as the user adjusts sliders)
+    const colorBalanceDebounce = debounce(() => {
+        const rFactor = parseFloat(document.getElementById('red-slider').value);
+        const gFactor = parseFloat(document.getElementById('green-slider').value);
+        const bFactor = parseFloat(document.getElementById('blue-slider').value);
+        applyEnhancement('color_balance', { 
+            r_factor: rFactor,
+            g_factor: gFactor,
+            b_factor: bFactor
+        });
+    }, 300);
+    
+    document.getElementById('red-slider').addEventListener('input', colorBalanceDebounce);
+    document.getElementById('green-slider').addEventListener('input', colorBalanceDebounce);
+    document.getElementById('blue-slider').addEventListener('input', colorBalanceDebounce);
+    
+    // Sepia Filter
+    document.getElementById('sepia-btn').addEventListener('click', function() {
+        const intensity = parseFloat(document.getElementById('sepia-slider').value);
+        applyEnhancement('sepia_filter', { intensity });
+    });
+    
+    // Update sepia slider value
+    document.getElementById('sepia-slider').addEventListener('input', function() {
+        document.getElementById('sepia-value').textContent = this.value;
+        
+        // Real-time sepia preview
+        debounce(() => {
+            const intensity = parseFloat(this.value);
+            applyEnhancement('sepia_filter', { intensity });
+        }, 300)();
+    });
+    
+    // Noise Reduction
+    document.getElementById('noise-reduction-btn').addEventListener('click', function() {
+        const strength = parseInt(document.getElementById('noise-slider').value);
+        applyEnhancement('noise_reduction', { strength });
+    });
+    
+    // Update noise slider value
+    document.getElementById('noise-slider').addEventListener('input', function() {
+        document.getElementById('noise-value').textContent = this.value;
+    });
+    
+    // Sharpen
+    document.getElementById('sharpen-btn').addEventListener('click', function() {
+        const strength = parseFloat(document.getElementById('sharpen-slider').value);
+        applyEnhancement('sharpen', { strength });
+    });
+    
+    // Update sharpen slider value
+    document.getElementById('sharpen-slider').addEventListener('input', function() {
+        document.getElementById('sharpen-value').textContent = this.value;
+        
+        // Real-time sharpen preview
+        debounce(() => {
+            const strength = parseFloat(this.value);
+            applyEnhancement('sharpen', { strength });
+        }, 300)();
+    });
 }
 
 // Debounce function to limit the rate of function calls
@@ -498,6 +584,26 @@ function resetImage() {
     
     // Reset super resolution options
     document.getElementById('scale-2x').checked = true;
+    
+    // Reset color balance
+    document.getElementById('red-slider').value = 1;
+    document.getElementById('red-value').textContent = '1.0';
+    document.getElementById('green-slider').value = 1;
+    document.getElementById('green-value').textContent = '1.0';
+    document.getElementById('blue-slider').value = 1;
+    document.getElementById('blue-value').textContent = '1.0';
+    
+    // Reset sepia
+    document.getElementById('sepia-slider').value = 0.5;
+    document.getElementById('sepia-value').textContent = '0.5';
+    
+    // Reset noise reduction
+    document.getElementById('noise-slider').value = 7;
+    document.getElementById('noise-value').textContent = '7';
+    
+    // Reset sharpen
+    document.getElementById('sharpen-slider').value = 1;
+    document.getElementById('sharpen-value').textContent = '1.0';
     
     // Update comparison slider
     updateComparisonSlider();

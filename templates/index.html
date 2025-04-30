@@ -181,6 +181,88 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="card-subtitle mb-2">Color Adjustments</h6>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Color Balance</span>
+                                        <i class="bi bi-palette"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Red Channel</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="red-slider" min="0.5" max="2" step="0.1" value="1">
+                                            <span id="red-value" class="badge bg-danger">1.0</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Green Channel</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="green-slider" min="0.5" max="2" step="0.1" value="1">
+                                            <span id="green-value" class="badge bg-success">1.0</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Blue Channel</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="blue-slider" min="0.5" max="2" step="0.1" value="1">
+                                            <span id="blue-value" class="badge bg-primary">1.0</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="color-balance-btn">Apply Color Balance</button>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Sepia Filter</span>
+                                        <i class="bi bi-camera-fill"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Intensity</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="sepia-slider" min="0.1" max="1" step="0.1" value="0.5">
+                                            <span id="sepia-value" class="badge bg-secondary">0.5</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="sepia-btn">Apply Sepia Filter</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="card-subtitle mb-2">Special Effects</h6>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Noise Reduction</span>
+                                        <i class="bi bi-snow"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Strength</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="noise-slider" min="3" max="15" step="1" value="7">
+                                            <span id="noise-value" class="badge bg-secondary">7</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="noise-reduction-btn">Apply Noise Reduction</button>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Sharpen</span>
+                                        <i class="bi bi-layers-half"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Strength</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="sharpen-slider" min="0.5" max="3" step="0.1" value="1">
+                                            <span id="sharpen-value" class="badge bg-secondary">1.0</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="sharpen-btn">Apply Sharpen</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
