@@ -126,6 +126,61 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="card-subtitle mb-2">Advanced Techniques</h6>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Edge Detection</span>
+                                        <i class="bi bi-intersect"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Method</label>
+                                        <div class="btn-group w-100 mb-2" role="group">
+                                            <input type="radio" class="btn-check" name="edge-method" id="edge-sobel" value="sobel" checked>
+                                            <label class="btn btn-sm btn-outline-secondary" for="edge-sobel">Sobel</label>
+                                            <input type="radio" class="btn-check" name="edge-method" id="edge-canny" value="canny">
+                                            <label class="btn btn-sm btn-outline-secondary" for="edge-canny">Canny</label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 canny-options" style="display: none;">
+                                        <label class="form-label small">Threshold 1</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="edge-threshold1-slider" min="10" max="300" step="10" value="100">
+                                            <span id="edge-threshold1-value" class="badge bg-secondary">100</span>
+                                        </div>
+                                        <label class="form-label small">Threshold 2</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="edge-threshold2-slider" min="10" max="300" step="10" value="200">
+                                            <span id="edge-threshold2-value" class="badge bg-secondary">200</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="edge-detection-btn">Apply Edge Detection</button>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Super Resolution</span>
+                                        <i class="bi bi-aspect-ratio"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Scale Factor</label>
+                                        <div class="btn-group w-100" role="group">
+                                            <input type="radio" class="btn-check" name="scale-factor" id="scale-2x" value="2" checked>
+                                            <label class="btn btn-sm btn-outline-secondary" for="scale-2x">2x</label>
+                                            <input type="radio" class="btn-check" name="scale-factor" id="scale-3x" value="3">
+                                            <label class="btn btn-sm btn-outline-secondary" for="scale-3x">3x</label>
+                                            <input type="radio" class="btn-check" name="scale-factor" id="scale-4x" value="4">
+                                            <label class="btn btn-sm btn-outline-secondary" for="scale-4x">4x</label>
+                                        </div>
+                                        <div class="small text-warning mt-2">
+                                            <i class="bi bi-exclamation-triangle"></i> Higher scale factors may take longer to process
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="super-resolution-btn">Apply Super Resolution</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

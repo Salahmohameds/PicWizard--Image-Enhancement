@@ -96,3 +96,74 @@ class ImageProcessor:
             radius += 1
             
         return cv2.GaussianBlur(img, (radius, radius), 0)
+        
+    def edge_detection(self, img, method='sobel', threshold1=100, threshold2=200):
+        """
+        Apply edge detection to the image
+        
+        Args:
+            img: Input image
+            method: 'sobel' or 'canny'
+            threshold1: First threshold for Canny detector
+            threshold2: Second threshold for Canny detector
+            
+        Returns:
+            Edge-detected image
+        """
+        # Convert to grayscale if needed
+        if len(img.shape) == 3:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = img.copy()
+        
+        if method.lower() == 'sobel':
+            # Apply Sobel operator
+            sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+            sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+            
+            # Compute magnitude
+            magnitude = np.sqrt(sobelx**2 + sobely**2).astype(np.uint8)
+            
+            # Create color edge image
+            if len(img.shape) == 3:
+                # Create a colored edge image
+                edge_img = img.copy()
+                edge_img[magnitude < 50] = 0  # Black out low-magnitude areas
+                return edge_img
+            else:
+                return magnitude
+                
+        elif method.lower() == 'canny':
+            # Apply Canny edge detector
+            edges = cv2.Canny(gray, threshold1, threshold2)
+            
+            if len(img.shape) == 3:
+                # Create a colored edge image
+                edge_img = img.copy()
+                edge_img[edges == 0] = 0  # Black out non-edge areas
+                return edge_img
+            else:
+                return edges
+                
+        else:
+            return img  # Return original if method not recognized
+    
+    def super_resolution(self, img, scale_factor=2):
+        """
+        Apply basic super resolution by resizing with better interpolation
+        
+        Args:
+            img: Input image
+            scale_factor: Factor to scale the image (2 = 2x size)
+            
+        Returns:
+            Upscaled image
+        """
+        # Get dimensions
+        h, w = img.shape[:2]
+        
+        # Calculate new dimensions
+        new_h, new_w = h * scale_factor, w * scale_factor
+        
+        # Resize with cubic interpolation (better quality than linear)
+        return cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_CUBIC)

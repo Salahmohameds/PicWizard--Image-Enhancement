@@ -63,6 +63,14 @@ def enhance():
         elif method == 'gaussian_blur':
             radius = int(params.get('radius', 5))
             result = processor.gaussian_blur(img, radius)
+        elif method == 'edge_detection':
+            detection_method = params.get('detection_method', 'sobel')
+            threshold1 = int(params.get('threshold1', 100))
+            threshold2 = int(params.get('threshold2', 200))
+            result = processor.edge_detection(img, method=detection_method, threshold1=threshold1, threshold2=threshold2)
+        elif method == 'super_resolution':
+            scale_factor = int(params.get('scale_factor', 2))
+            result = processor.super_resolution(img, scale_factor=scale_factor)
         else:
             logger.error(f"Unknown method: {method}")
             return jsonify({"error": f"Unknown enhancement method: {method}"}), 400

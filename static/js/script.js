@@ -153,6 +153,13 @@ function setupEnhancementButtons() {
         applyEnhancement('gamma_correction', { gamma });
     });
     
+    // Real-time gamma correction
+    document.getElementById('gamma-slider').addEventListener('input', function() {
+        const gamma = parseFloat(this.value);
+        document.getElementById('gamma-value').textContent = gamma.toFixed(1);
+        debounce(() => applyEnhancement('gamma_correction', { gamma }), 300)();
+    });
+    
     // Unsharp Mask
     document.getElementById('unsharp-mask-btn').addEventListener('click', function() {
         const amount = parseFloat(document.getElementById('unsharp-amount-slider').value);
@@ -165,19 +172,68 @@ function setupEnhancementButtons() {
         const radius = parseInt(document.getElementById('blur-radius-slider').value);
         applyEnhancement('gaussian_blur', { radius });
     });
+    
+    // Real-time gaussian blur
+    document.getElementById('blur-radius-slider').addEventListener('input', function() {
+        const radius = parseInt(this.value);
+        document.getElementById('blur-radius-value').textContent = radius;
+        debounce(() => applyEnhancement('gaussian_blur', { radius }), 300)();
+    });
+    
+    // Edge Detection
+    document.getElementById('edge-detection-btn').addEventListener('click', function() {
+        const detectionMethod = document.querySelector('input[name="edge-method"]:checked').value;
+        const threshold1 = parseInt(document.getElementById('edge-threshold1-slider').value);
+        const threshold2 = parseInt(document.getElementById('edge-threshold2-slider').value);
+        applyEnhancement('edge_detection', { 
+            detection_method: detectionMethod,
+            threshold1,
+            threshold2
+        });
+    });
+    
+    // Toggle Canny options when method changes
+    document.querySelectorAll('input[name="edge-method"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const cannyOptions = document.querySelector('.canny-options');
+            if (this.value === 'canny') {
+                cannyOptions.style.display = 'block';
+            } else {
+                cannyOptions.style.display = 'none';
+            }
+        });
+    });
+    
+    // Update threshold values
+    document.getElementById('edge-threshold1-slider').addEventListener('input', function() {
+        document.getElementById('edge-threshold1-value').textContent = this.value;
+    });
+    
+    document.getElementById('edge-threshold2-slider').addEventListener('input', function() {
+        document.getElementById('edge-threshold2-value').textContent = this.value;
+    });
+    
+    // Super Resolution
+    document.getElementById('super-resolution-btn').addEventListener('click', function() {
+        const scaleFactor = parseInt(document.querySelector('input[name="scale-factor"]:checked').value);
+        applyEnhancement('super_resolution', { scale_factor: scaleFactor });
+    });
+}
+
+// Debounce function to limit the rate of function calls
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
 }
 
 // Sliders Setup
 function setupSliders() {
-    // Gamma slider
-    const gammaSlider = document.getElementById('gamma-slider');
-    const gammaValue = document.getElementById('gamma-value');
-    
-    gammaSlider.addEventListener('input', function() {
-        gammaValue.textContent = this.value;
-    });
-    
-    // Unsharp mask sliders
+    // Unsharp mask sliders - setup interactive values without applying filter immediately
     const unsharpAmountSlider = document.getElementById('unsharp-amount-slider');
     const unsharpAmountValue = document.getElementById('unsharp-amount-value');
     
@@ -192,12 +248,32 @@ function setupSliders() {
         unsharpRadiusValue.textContent = this.value;
     });
     
-    // Gaussian blur slider
-    const blurRadiusSlider = document.getElementById('blur-radius-slider');
-    const blurRadiusValue = document.getElementById('blur-radius-value');
+    // Real-time unsharp mask application as user adjusts sliders
+    unsharpAmountSlider.addEventListener('change', function() {
+        const amount = parseFloat(this.value);
+        const radius = parseInt(document.getElementById('unsharp-radius-slider').value);
+        applyEnhancement('unsharp_mask', { amount, radius });
+    });
     
-    blurRadiusSlider.addEventListener('input', function() {
-        blurRadiusValue.textContent = this.value;
+    unsharpRadiusSlider.addEventListener('change', function() {
+        const radius = parseInt(this.value);
+        const amount = parseFloat(document.getElementById('unsharp-amount-slider').value);
+        applyEnhancement('unsharp_mask', { amount, radius });
+    });
+    
+    // Edge detection sliders with real-time value updates
+    const edgeThreshold1Slider = document.getElementById('edge-threshold1-slider');
+    const edgeThreshold1Value = document.getElementById('edge-threshold1-value');
+    
+    edgeThreshold1Slider.addEventListener('input', function() {
+        edgeThreshold1Value.textContent = this.value;
+    });
+    
+    const edgeThreshold2Slider = document.getElementById('edge-threshold2-slider');
+    const edgeThreshold2Value = document.getElementById('edge-threshold2-value');
+    
+    edgeThreshold2Slider.addEventListener('input', function() {
+        edgeThreshold2Value.textContent = this.value;
     });
 }
 
@@ -359,18 +435,30 @@ function resetImage() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
     
-    // Reset sliders
+    // Reset basic adjustment sliders
     document.getElementById('gamma-slider').value = 1;
     document.getElementById('gamma-value').textContent = '1.0';
     
+    // Reset unsharp mask sliders
     document.getElementById('unsharp-amount-slider').value = 1;
     document.getElementById('unsharp-amount-value').textContent = '1.0';
-    
     document.getElementById('unsharp-radius-slider').value = 5;
     document.getElementById('unsharp-radius-value').textContent = '5';
     
+    // Reset gaussian blur slider
     document.getElementById('blur-radius-slider').value = 3;
     document.getElementById('blur-radius-value').textContent = '3';
+    
+    // Reset edge detection options
+    document.getElementById('edge-sobel').checked = true;
+    document.getElementById('edge-threshold1-slider').value = 100;
+    document.getElementById('edge-threshold1-value').textContent = '100';
+    document.getElementById('edge-threshold2-slider').value = 200;
+    document.getElementById('edge-threshold2-value').textContent = '200';
+    document.querySelector('.canny-options').style.display = 'none';
+    
+    // Reset super resolution options
+    document.getElementById('scale-2x').checked = true;
     
     // Update comparison slider
     updateComparisonSlider();
