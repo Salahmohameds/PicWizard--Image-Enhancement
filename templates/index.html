@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PicWizard - Image Enhancement Toolkit</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="bg-dark py-3 mb-4 border-bottom">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="fs-4 m-0"><i class="bi bi-magic"></i> PicWizard</h1>
+            <span class="text-muted">Image Enhancement Toolkit</span>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark-subtle">
+                    <div class="card-body upload-area" id="upload-area">
+                        <div class="text-center py-5" id="upload-prompt">
+                            <i class="bi bi-cloud-arrow-up fs-1"></i>
+                            <h5 class="mt-3">Drop your image here or click to browse</h5>
+                            <p class="text-muted small">Supports JPG and PNG formats</p>
+                            <input type="file" id="file-input" accept="image/jpeg, image/png" class="d-none">
+                            <button class="btn btn-outline-secondary mt-2" id="browse-btn">Choose Image</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="editor-container" style="display: none;">
+            <div class="col-md-8 mb-4">
+                <div class="card bg-dark-subtle">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Image Preview</span>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" id="reset-btn">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" id="download-btn">
+                                <i class="bi bi-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 text-center position-relative overflow-hidden">
+                        <div class="comparison-slider-container">
+                            <div class="comparison-slider">
+                                <div class="comparison-divider"></div>
+                            </div>
+                            <canvas id="image-canvas" class="img-fluid"></canvas>
+                        </div>
+                        <div id="processing-indicator" class="position-absolute top-50 start-50 translate-middle" style="display: none;">
+                            <div class="spinner-border text-light" role="status"></div>
+                            <p class="text-light mt-2">Processing...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card bg-dark-subtle">
+                    <div class="card-header">
+                        <span>Enhancement Tools</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="card-subtitle mb-2">Basic Adjustments</h6>
+                            <div class="list-group">
+                                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" id="histogram-eq-btn">
+                                    Histogram Equalization
+                                    <i class="bi bi-bar-chart"></i>
+                                </button>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Gamma Correction</span>
+                                        <i class="bi bi-brightness-high"></i>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="gamma-slider" min="0.1" max="3" step="0.1" value="1">
+                                        <span id="gamma-value" class="badge bg-secondary">1.0</span>
+                                        <button class="btn btn-sm btn-primary" id="gamma-btn">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="card-subtitle mb-2">Detail Enhancement</h6>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Unsharp Mask</span>
+                                        <i class="bi bi-image-alt"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Amount</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="unsharp-amount-slider" min="0.1" max="3" step="0.1" value="1">
+                                            <span id="unsharp-amount-value" class="badge bg-secondary">1.0</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Radius</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="unsharp-radius-slider" min="1" max="15" step="2" value="5">
+                                            <span id="unsharp-radius-value" class="badge bg-secondary">5</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="unsharp-mask-btn">Apply Unsharp Mask</button>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Gaussian Blur</span>
+                                        <i class="bi bi-eyeglasses"></i>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="range" class="form-range" id="blur-radius-slider" min="1" max="15" step="2" value="3">
+                                        <span id="blur-radius-value" class="badge bg-secondary">3</span>
+                                        <button class="btn btn-sm btn-primary" id="gaussian-blur-btn">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark py-3 mt-auto text-center text-muted">
+        <div class="container">
+            <p class="m-0 small">PicWizard - A Web-Based Image Enhancement Toolkit</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
