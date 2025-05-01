@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup sliders
     setupSliders();
     
+    // Setup social sharing
+    setupSocialSharing();
+    
     // Setup comparison slider
     setupComparisonSlider();
     
@@ -1022,3 +1025,61 @@ function dataURLToBlob(dataURL) {
     
     return new Blob([uInt8Array], { type: contentType });
 }
+
+// Social Media Sharing Functions
+function setupSocialSharing() {
+    // Twitter Share
+    document.getElementById('twitter-share').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Get current canvas image
+        const imageUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        // Since we can't upload the image directly to Twitter through the API,
+        // we'll provide a text with a link to the app
+        const text = 'Check out this image I enhanced with PicWizard!';
+        const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+        
+        // Open a new window to share on Twitter
+        window.open(shareUrl, '_blank', 'width=550,height=420');
+    });
+    
+    // Facebook Share
+    document.getElementById('facebook-share').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Facebook sharing URL (needs a publicly accessible URL for the image)
+        const shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + 
+                          encodeURIComponent(window.location.href);
+        
+        // Open a new window to share on Facebook
+        window.open(shareUrl, '_blank', 'width=550,height=420');
+    });
+    
+    // Pinterest Share
+    document.getElementById('pinterest-share').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Pinterest needs both an image URL and a page URL
+        // For demo purposes, we'll just share the page URL with a description
+        const description = 'Image enhanced with PicWizard';
+        const shareUrl = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(window.location.href)}&description=${encodeURIComponent(description)}`;
+        
+        // Open a new window to share on Pinterest
+        window.open(shareUrl, '_blank', 'width=750,height=550');
+    });
+    
+    // LinkedIn Share
+    document.getElementById('linkedin-share').addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // LinkedIn sharing URL
+        const shareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + 
+                          encodeURIComponent(window.location.href);
+        
+        // Open a new window to share on LinkedIn
+        window.open(shareUrl, '_blank', 'width=550,height=420');
+    });
+}
+
+// Social sharing is now integrated into the main DOMContentLoaded handler

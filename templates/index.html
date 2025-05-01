@@ -247,6 +247,34 @@
                         <div class="mb-3">
                             <h6 class="card-subtitle mb-2">Color Adjustments</h6>
                             <div class="list-group">
+                                <div class="enhancement-tooltip">
+                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" id="extract-palette-btn">
+                                        Extract Color Palette
+                                        <span>
+                                            <i class="bi bi-stars ai-suggestion" title="AI Suggestion"></i>
+                                            <i class="bi bi-palette2"></i>
+                                        </span>
+                                    </button>
+                                    <div class="tooltip-text">
+                                        <strong>AI Suggestion:</strong> Extract the dominant colors from your image. Useful for design projects, website color schemes, and matching complementary colors.
+                                    </div>
+                                </div>
+                                <!-- Color palette display area -->
+                                <div class="list-group-item" id="color-palette-container" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Dominant Colors</span>
+                                        <i class="bi bi-palette"></i>
+                                    </div>
+                                    <div class="color-palette-display d-flex mb-2"></div>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-outline-secondary copy-palette-btn">
+                                            <i class="bi bi-clipboard me-1"></i>Copy HEX
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" id="close-palette-btn">
+                                            <i class="bi bi-x-circle me-1"></i>Close
+                                        </button>
+                                    </div>
+                                </div>
                                 <div class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span>Color Balance</span>
