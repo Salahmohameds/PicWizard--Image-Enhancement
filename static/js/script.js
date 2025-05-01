@@ -610,9 +610,6 @@ function setupEnhancementButtons() {
         });
     });
     
-    // End of enhancement button setup
-}
-    
     // Apply piecewise linear transform
     document.getElementById('piecewise-linear-btn').addEventListener('click', function() {
         // Collect all point coordinates
