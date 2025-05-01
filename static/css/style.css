@@ -91,6 +91,46 @@ body {
   border-color: var(--success-color);
 }
 
+/* Upload animations */
+.upload-area.drop-animation {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(106, 100, 241, 0.3);
+  transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes uploadSuccess {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.bi-check-circle-fill {
+  animation: uploadSuccess 0.6s ease-out;
+}
+
+.upload-area h5, .upload-area p {
+  animation: fadeIn 0.5s ease-out;
+}
+
 /* Canvas container */
 #image-canvas {
   max-width: 100%;
@@ -215,4 +255,90 @@ body {
 
 .spinner-border {
   animation: spinner-border 1s linear infinite, pulse 2s infinite;
+}
+
+/* Tooltips */
+.enhancement-tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.enhancement-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 250px;
+  background-color: rgba(30, 30, 30, 0.9);
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -125px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.85rem;
+}
+
+.enhancement-tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(30, 30, 30, 0.9) transparent transparent transparent;
+}
+
+.enhancement-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* AI suggestion icon */
+.ai-suggestion {
+  color: var(--primary-color);
+  margin-left: 5px;
+  font-size: 0.8em;
+  vertical-align: super;
+}
+
+/* Social sharing */
+.social-share-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.social-share-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.twitter-share {
+  background-color: #1DA1F2;
+}
+
+.facebook-share {
+  background-color: #4267B2;
+}
+
+.pinterest-share {
+  background-color: #E60023;
+}
+
+.social-share-button:hover {
+  transform: scale(1.1);
 }

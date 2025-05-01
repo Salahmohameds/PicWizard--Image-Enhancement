@@ -66,14 +66,21 @@ function setupUploadHandler() {
             currentImageIndex = 0;
             
             // Process each file
-            for (let i = 0; i < this.files.length; i++) {
-                processUploadedFile(this.files[i], i === 0); // Only show the first image initially
-            }
+            const totalFiles = this.files.length;
+            let loadedCount = 0;
             
-            // Show the image navigation controls if multiple files are uploaded
-            if (this.files.length > 1) {
-                document.getElementById('images-navigation').style.display = 'block';
-                updateImageCounter();
+            for (let i = 0; i < totalFiles; i++) {
+                processUploadedFile(this.files[i], i === 0, () => {
+                    loadedCount++;
+                    // When all files are loaded, update navigation
+                    if (loadedCount === totalFiles) {
+                        console.log(`All ${totalFiles} files loaded successfully`);
+                        // Update navigation controls visibility
+                        document.getElementById('images-navigation').style.display = totalFiles > 1 ? 'block' : 'none';
+                        updateImageCounter();
+                        updateNavigationButtons();
+                    }
+                });
             }
         }
     });
@@ -92,6 +99,12 @@ function setupUploadHandler() {
         e.preventDefault();
         uploadArea.classList.remove('drag-over');
         
+        // Add animation for drop effect
+        uploadArea.classList.add('drop-animation');
+        setTimeout(() => {
+            uploadArea.classList.remove('drop-animation');
+        }, 500);
+        
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             // Reset image arrays when new files are dropped
             images = [];
@@ -99,21 +112,44 @@ function setupUploadHandler() {
             currentImageIndex = 0;
             
             // Process each file
-            for (let i = 0; i < e.dataTransfer.files.length; i++) {
-                processUploadedFile(e.dataTransfer.files[i], i === 0); // Only show the first image initially
-            }
+            const totalFiles = e.dataTransfer.files.length;
+            let loadedCount = 0;
             
-            // Show the image navigation controls if multiple files are dropped
-            if (e.dataTransfer.files.length > 1) {
-                document.getElementById('images-navigation').style.display = 'block';
-                updateImageCounter();
+            // Show loading indicator
+            document.getElementById('upload-prompt').innerHTML = `
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="mt-3">Loading ${totalFiles} image${totalFiles > 1 ? 's' : ''}...</h5>
+            `;
+            
+            for (let i = 0; i < totalFiles; i++) {
+                processUploadedFile(e.dataTransfer.files[i], i === 0, () => {
+                    loadedCount++;
+                    // When all files are loaded, update navigation
+                    if (loadedCount === totalFiles) {
+                        console.log(`All ${totalFiles} files loaded successfully`);
+                        
+                        // Update upload prompt message
+                        document.getElementById('upload-prompt').innerHTML = `
+                            <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                            <h5 class="mt-3">${totalFiles} image${totalFiles > 1 ? 's' : ''} uploaded</h5>
+                            <p class="small">Drag & drop or click to upload different images</p>
+                        `;
+                        
+                        // Update navigation controls visibility
+                        document.getElementById('images-navigation').style.display = totalFiles > 1 ? 'block' : 'none';
+                        updateImageCounter();
+                        updateNavigationButtons();
+                    }
+                });
             }
         }
     });
 }
 
 // Process uploaded file
-function processUploadedFile(file, displayImage = true) {
+function processUploadedFile(file, displayImage = true, callback = null) {
     console.log("Processing file:", file.name, "Type:", file.type, "Size:", file.size);
     
     // Validate file type
@@ -121,6 +157,7 @@ function processUploadedFile(file, displayImage = true) {
         !file.type.match('image/webp') && !file.type.match('image/bmp') && 
         !file.type.match('image/gif') && !file.type.match('image/tiff')) {
         alert(`File ${file.name} is not a supported image format. Skipping.`);
+        if (callback) callback();
         return;
     }
     
@@ -187,6 +224,9 @@ function processUploadedFile(file, displayImage = true) {
                 // Update current filename display
                 document.getElementById('current-filename').textContent = file.name;
             }
+            
+            // Execute the callback if provided
+            if (callback) callback();
         };
         
         // Set image source from FileReader result

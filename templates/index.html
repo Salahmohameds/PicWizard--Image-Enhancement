@@ -115,10 +115,18 @@
                         <div class="mb-3">
                             <h6 class="card-subtitle mb-2">Basic Adjustments</h6>
                             <div class="list-group">
-                                <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" id="histogram-eq-btn">
-                                    Histogram Equalization
-                                    <i class="bi bi-bar-chart"></i>
-                                </button>
+                                <div class="enhancement-tooltip">
+                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" id="histogram-eq-btn">
+                                        Histogram Equalization
+                                        <span>
+                                            <i class="bi bi-stars ai-suggestion" title="AI Suggestion"></i>
+                                            <i class="bi bi-bar-chart"></i>
+                                        </span>
+                                    </button>
+                                    <div class="tooltip-text">
+                                        <strong>AI Suggestion:</strong> Perfect for improving contrast in dark or flat images. Especially effective for landscapes and black & white photos.
+                                    </div>
+                                </div>
                                 <div class="list-group-item">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <span>Gamma Correction</span>
@@ -202,11 +210,15 @@
                                     </div>
                                     <button class="btn btn-sm btn-primary w-100 mt-2" id="edge-detection-btn">Apply Edge Detection</button>
                                 </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>Super Resolution</span>
-                                        <i class="bi bi-aspect-ratio"></i>
-                                    </div>
+                                <div class="enhancement-tooltip">
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Super Resolution <i class="bi bi-stars ai-suggestion" title="AI Suggestion"></i></span>
+                                            <i class="bi bi-aspect-ratio"></i>
+                                        </div>
+                                        <div class="tooltip-text">
+                                            <strong>AI Suggestion:</strong> Best for small images that need enlargement without losing quality. Great for old photos, thumbnails, or creating prints from digital images.
+                                        </div>
                                     <div class="mb-2">
                                         <label class="form-label small">Scale Factor</label>
                                         <div class="btn-group w-100" role="group">
