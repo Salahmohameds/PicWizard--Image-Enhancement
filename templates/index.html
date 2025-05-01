@@ -79,13 +79,21 @@
                                 <button class="btn btn-sm btn-outline-secondary" id="reset-btn">
                                     <i class="bi bi-arrow-counterclockwise"></i> Reset
                                 </button>
+                                <button class="btn btn-sm btn-success me-2" id="download-btn">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
                                 <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-download"></i> Download
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="downloadMoreDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots"></i>
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="downloadDropdown">
-                                        <li><button class="dropdown-item" id="download-btn">Current Image</button></li>
-                                        <li><button class="dropdown-item" id="download-all-btn">All Images as ZIP</button></li>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="downloadMoreDropdown">
+                                        <li><button class="dropdown-item" id="download-all-btn"><i class="bi bi-file-earmark-zip me-2"></i>Download All as ZIP</button></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header">Format Options</h6></li>
+                                        <li><button class="dropdown-item format-option" data-format="image/png"><i class="bi bi-check me-2 format-check" id="png-check"></i>PNG (Lossless)</button></li>
+                                        <li><button class="dropdown-item format-option" data-format="image/jpeg"><i class="bi bi-check me-2 format-check" id="jpeg-check" style="visibility: hidden;"></i>JPEG (Small Size)</button></li>
+                                        <li><button class="dropdown-item format-option" data-format="image/webp"><i class="bi bi-check me-2 format-check" id="webp-check" style="visibility: hidden;"></i>WebP (Best Quality/Size)</button></li>
+                                        <li><button class="dropdown-item format-option" data-format="image/bmp"><i class="bi bi-check me-2 format-check" id="bmp-check" style="visibility: hidden;"></i>BMP (Compatible)</button></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><h6 class="dropdown-header">Share on Social Media</h6></li>
                                         <li><button class="dropdown-item" id="twitter-share"><i class="bi bi-twitter me-2"></i>Twitter</button></li>
