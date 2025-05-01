@@ -116,6 +116,16 @@ def enhance():
         elif method == 'enhance_vessels':
             strength = float(params.get('strength', 1.5))
             result = processor.enhance_vessels(img, strength=strength)
+        elif method == 'extract_palette':
+            # Extract color palette
+            num_colors = int(params.get('num_colors', 5))
+            palette = processor.extract_color_palette(img, num_colors=num_colors)
+            
+            # Return palette as JSON without encoding image
+            return jsonify({
+                'method': method,
+                'palette': palette
+            })
         else:
             logger.error(f"Unknown method: {method}")
             return jsonify({"error": f"Unknown enhancement method: {method}"}), 400

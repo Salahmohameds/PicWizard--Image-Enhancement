@@ -314,3 +314,54 @@ class ImageProcessor:
             Vessel-enhanced image
         """
         return self.medical_processor.enhance_vessels(img, strength)
+        
+    def extract_color_palette(self, img, num_colors=5):
+        """
+        Extract dominant colors from the image to create a color palette
+        
+        Args:
+            img: Input image
+            num_colors: Number of dominant colors to extract
+            
+        Returns:
+            List of dominant colors in HEX format
+        """
+        # Resize image to speed up processing
+        img_small = cv2.resize(img, (150, 150))
+        
+        # Convert to RGB format if needed
+        if len(img_small.shape) == 3 and img_small.shape[2] == 3:
+            img_rgb = cv2.cvtColor(img_small, cv2.COLOR_BGR2RGB)
+        else:
+            img_rgb = cv2.cvtColor(img_small, cv2.COLOR_GRAY2RGB)
+        
+        # Reshape the image to be a list of pixels
+        pixels = img_rgb.reshape((-1, 3))
+        
+        # Convert to float type for k-means
+        pixels = np.float32(pixels)
+        
+        # Define criteria
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
+        
+        # Apply k-means clustering
+        _, labels, centers = cv2.kmeans(pixels, num_colors, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+        
+        # Convert back to 8-bit values
+        centers = np.uint8(centers)
+        
+        # Count occurrence of each label
+        counts = np.bincount(labels.flatten())
+        
+        # Sort colors by occurrence
+        indices = np.argsort(counts)[::-1]
+        
+        # Convert RGB to HEX
+        palette = []
+        for i in indices:
+            if i < len(centers):  # Safety check
+                r, g, b = centers[i]
+                hex_color = f'#{r:02x}{g:02x}{b:02x}'
+                palette.append(hex_color)
+                
+        return palette
