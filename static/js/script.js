@@ -348,6 +348,67 @@ function setupEnhancementButtons() {
         const value = Math.round(this.value * 100);
         qualityValue.textContent = `${value}%`;
     });
+    
+    // Medical image processing tools
+    
+    // CLAHE Enhancement
+    document.getElementById('clahe-clip-slider').addEventListener('input', function() {
+        document.getElementById('clahe-clip-value').textContent = this.value;
+    });
+    
+    document.getElementById('clahe-grid-slider').addEventListener('input', function() {
+        document.getElementById('clahe-grid-value').textContent = this.value;
+    });
+    
+    document.getElementById('clahe-btn').addEventListener('click', function() {
+        const clipLimit = parseFloat(document.getElementById('clahe-clip-slider').value);
+        const gridSize = parseInt(document.getElementById('clahe-grid-slider').value);
+        applyEnhancement('clahe_enhance', { 
+            clip_limit: clipLimit,
+            grid_size: gridSize
+        });
+    });
+    
+    // DICOM Windowing
+    document.getElementById('window-width-slider').addEventListener('input', function() {
+        document.getElementById('window-width-value').textContent = this.value;
+    });
+    
+    document.getElementById('window-level-slider').addEventListener('input', function() {
+        document.getElementById('window-level-value').textContent = this.value;
+    });
+    
+    document.getElementById('dicom-window-btn').addEventListener('click', function() {
+        const windowWidth = parseInt(document.getElementById('window-width-slider').value);
+        const windowLevel = parseInt(document.getElementById('window-level-slider').value);
+        applyEnhancement('dicom_window', { 
+            window_width: windowWidth,
+            window_level: windowLevel
+        });
+    });
+    
+    // Real-time DICOM windowing
+    const dicomWindowDebounce = debounce(() => {
+        const windowWidth = parseInt(document.getElementById('window-width-slider').value);
+        const windowLevel = parseInt(document.getElementById('window-level-slider').value);
+        applyEnhancement('dicom_window', { 
+            window_width: windowWidth,
+            window_level: windowLevel
+        });
+    }, 300);
+    
+    document.getElementById('window-width-slider').addEventListener('input', dicomWindowDebounce);
+    document.getElementById('window-level-slider').addEventListener('input', dicomWindowDebounce);
+    
+    // Vessel Enhancement
+    document.getElementById('vessel-slider').addEventListener('input', function() {
+        document.getElementById('vessel-value').textContent = this.value;
+    });
+    
+    document.getElementById('enhance-vessels-btn').addEventListener('click', function() {
+        const strength = parseFloat(document.getElementById('vessel-slider').value);
+        applyEnhancement('enhance_vessels', { strength });
+    });
 }
 
 // Debounce function to limit the rate of function calls
@@ -628,6 +689,22 @@ function resetImage() {
     // Reset sharpen
     document.getElementById('sharpen-slider').value = 1;
     document.getElementById('sharpen-value').textContent = '1.0';
+    
+    // Reset CLAHE
+    document.getElementById('clahe-clip-slider').value = 2;
+    document.getElementById('clahe-clip-value').textContent = '2.0';
+    document.getElementById('clahe-grid-slider').value = 8;
+    document.getElementById('clahe-grid-value').textContent = '8';
+    
+    // Reset DICOM windowing
+    document.getElementById('window-width-slider').value = 400;
+    document.getElementById('window-width-value').textContent = '400';
+    document.getElementById('window-level-slider').value = 50;
+    document.getElementById('window-level-value').textContent = '50';
+    
+    // Reset vessel enhancement
+    document.getElementById('vessel-slider').value = 1.5;
+    document.getElementById('vessel-value').textContent = '1.5';
     
     // Update comparison slider
     updateComparisonSlider();

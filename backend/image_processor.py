@@ -1,8 +1,13 @@
 import cv2
 import numpy as np
+from backend.medical_processor import MedicalImageProcessor
 
 class ImageProcessor:
     """Class for image enhancement operations using OpenCV"""
+    
+    def __init__(self):
+        # Initialize medical image processor
+        self.medical_processor = MedicalImageProcessor()
     
     def histogram_equalization(self, img):
         """
@@ -262,3 +267,50 @@ class ImageProcessor:
         
         # Ensure values are in valid range
         return np.clip(sharpened, 0, 255).astype(np.uint8)
+        
+    # Medical image processing methods
+    
+    def clahe_enhance(self, img, clip_limit=2.0, grid_size=8):
+        """
+        CLAHE (Contrast Limited Adaptive Histogram Equalization) for medical images
+        
+        Args:
+            img: Input image
+            clip_limit: Threshold for contrast limiting
+            grid_size: Size of grid for histogram equalization
+            
+        Returns:
+            CLAHE enhanced image
+        """
+        # Convert grid_size to tuple if it's a scalar
+        if isinstance(grid_size, int):
+            grid_size = (grid_size, grid_size)
+            
+        return self.medical_processor.clahe_enhance(img, clip_limit, grid_size)
+    
+    def dicom_window(self, img, window_width=400, window_level=50):
+        """
+        Apply DICOM windowing for medical images
+        
+        Args:
+            img: Input image
+            window_width: Window width (contrast)
+            window_level: Window level (brightness)
+            
+        Returns:
+            Windowed image
+        """
+        return self.medical_processor.dicom_window_level(img, window_width, window_level)
+    
+    def enhance_vessels(self, img, strength=1.5):
+        """
+        Enhance blood vessels visibility in angiograms
+        
+        Args:
+            img: Input image
+            strength: Enhancement strength
+            
+        Returns:
+            Vessel-enhanced image
+        """
+        return self.medical_processor.enhance_vessels(img, strength)

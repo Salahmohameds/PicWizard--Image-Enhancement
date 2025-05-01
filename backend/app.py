@@ -95,6 +95,18 @@ def enhance():
         elif method == 'sharpen':
             strength = float(params.get('strength', 1.0))
             result = processor.sharpen(img, strength=strength)
+        # Medical image processing methods
+        elif method == 'clahe_enhance':
+            clip_limit = float(params.get('clip_limit', 2.0))
+            grid_size = int(params.get('grid_size', 8))
+            result = processor.clahe_enhance(img, clip_limit=clip_limit, grid_size=grid_size)
+        elif method == 'dicom_window':
+            window_width = int(params.get('window_width', 400))
+            window_level = int(params.get('window_level', 50))
+            result = processor.dicom_window(img, window_width=window_width, window_level=window_level)
+        elif method == 'enhance_vessels':
+            strength = float(params.get('strength', 1.5))
+            result = processor.enhance_vessels(img, strength=strength)
         else:
             logger.error(f"Unknown method: {method}")
             return jsonify({"error": f"Unknown enhancement method: {method}"}), 400

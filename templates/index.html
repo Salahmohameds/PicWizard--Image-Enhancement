@@ -276,6 +276,68 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="card-subtitle mb-2">Medical Imaging</h6>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>CLAHE Enhancement</span>
+                                        <i class="bi bi-file-medical"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Clip Limit</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="clahe-clip-slider" min="1" max="5" step="0.5" value="2">
+                                            <span id="clahe-clip-value" class="badge bg-secondary">2.0</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Grid Size</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="clahe-grid-slider" min="2" max="16" step="2" value="8">
+                                            <span id="clahe-grid-value" class="badge bg-secondary">8</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="clahe-btn">Apply CLAHE</button>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>DICOM Windowing</span>
+                                        <i class="bi bi-heart-pulse"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Window Width (Contrast)</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="window-width-slider" min="50" max="600" step="50" value="400">
+                                            <span id="window-width-value" class="badge bg-secondary">400</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Window Level (Brightness)</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="window-level-slider" min="0" max="100" step="5" value="50">
+                                            <span id="window-level-value" class="badge bg-secondary">50</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="dicom-window-btn">Apply Windowing</button>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Vessel Enhancement</span>
+                                        <i class="bi bi-activity"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Strength</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="vessel-slider" min="0.5" max="3" step="0.1" value="1.5">
+                                            <span id="vessel-value" class="badge bg-secondary">1.5</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="enhance-vessels-btn">Enhance Vessels</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
