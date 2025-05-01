@@ -531,6 +531,110 @@ function setupEnhancementButtons() {
         const strength = parseFloat(document.getElementById('vessel-slider').value);
         applyEnhancement('enhance_vessels', { strength });
     });
+    
+    // Point Processing Techniques
+    
+    // Bit-Plane Slicing
+    document.getElementById('bit-plane-slider').addEventListener('input', function() {
+        document.getElementById('bit-plane-value').textContent = this.value;
+    });
+    
+    document.getElementById('bit-plane-btn').addEventListener('click', function() {
+        const bitPlane = parseInt(document.getElementById('bit-plane-slider').value);
+        applyEnhancement('bit_plane_slicing', { bit_plane: bitPlane });
+    });
+    
+    // Log Transformation
+    document.getElementById('log-c-slider').addEventListener('input', function() {
+        document.getElementById('log-c-value').textContent = parseFloat(this.value).toFixed(1);
+    });
+    
+    document.getElementById('log-transform-btn').addEventListener('click', function() {
+        const c = parseFloat(document.getElementById('log-c-slider').value);
+        applyEnhancement('log_transformation', { c });
+    });
+    
+    // Gray-Level Slicing
+    document.getElementById('gray-min-slider').addEventListener('input', function() {
+        const minVal = parseInt(this.value);
+        document.getElementById('gray-min-value').textContent = minVal;
+        
+        // Ensure max slider is always greater than min
+        const maxSlider = document.getElementById('gray-max-slider');
+        if (parseInt(maxSlider.value) <= minVal) {
+            maxSlider.value = minVal + 1;
+            document.getElementById('gray-max-value').textContent = minVal + 1;
+        }
+    });
+    
+    document.getElementById('gray-max-slider').addEventListener('input', function() {
+        const maxVal = parseInt(this.value);
+        document.getElementById('gray-max-value').textContent = maxVal;
+        
+        // Ensure min slider is always less than max
+        const minSlider = document.getElementById('gray-min-slider');
+        if (parseInt(minSlider.value) >= maxVal) {
+            minSlider.value = maxVal - 1;
+            document.getElementById('gray-min-value').textContent = maxVal - 1;
+        }
+    });
+    
+    document.getElementById('gray-level-btn').addEventListener('click', function() {
+        const minVal = parseInt(document.getElementById('gray-min-slider').value);
+        const maxVal = parseInt(document.getElementById('gray-max-slider').value);
+        const highlightOnly = document.getElementById('highlight-only-switch').checked;
+        
+        applyEnhancement('gray_level_slicing', { 
+            min_val: minVal,
+            max_val: maxVal,
+            highlight_only: highlightOnly
+        });
+    });
+    
+    // Piecewise Linear Transform
+    // Initialize the preset transforms
+    const PRESETS = {
+        negative: [[0, 255], [255, 0]],  // Invert image
+        threshold: [[0, 0], [127, 0], [128, 255], [255, 255]],  // Binary thresholding
+        posterize: [[0, 0], [63, 20], [127, 100], [191, 180], [255, 255]],  // Posterization effect
+        solarize: [[0, 255], [127, 0], [255, 255]]  // Solarization effect
+    };
+    
+    // Set up preset buttons
+    document.querySelectorAll('[data-preset]').forEach(button => {
+        button.addEventListener('click', function() {
+            const presetName = this.dataset.preset;
+            if (PRESETS[presetName]) {
+                updateControlPoints(PRESETS[presetName]);
+            }
+        });
+    });
+    
+    // Apply piecewise linear transform
+    document.getElementById('piecewise-linear-btn').addEventListener('click', function() {
+        // Collect all point coordinates
+        const points = [];
+        const pointInputs = document.querySelectorAll('#piecewise-control-points .d-flex');
+        
+        pointInputs.forEach(div => {
+            const xInput = div.querySelector('.point-x');
+            const yInput = div.querySelector('.point-y');
+            
+            if (xInput && yInput) {
+                const x = parseInt(xInput.value);
+                const y = parseInt(yInput.value);
+                points.push([x, y]);
+            }
+        });
+        
+        // Sort points by x-coordinate
+        points.sort((a, b) => a[0] - b[0]);
+        
+        // Apply the transform - make sure to use 'piecewise_linear' to match backend route
+        applyEnhancement('piecewise_linear', { 
+            points: JSON.stringify(points)
+        });
+    });
 }
 
 // Debounce function to limit the rate of function calls
@@ -770,11 +874,16 @@ function resetImage() {
     if (!originalImage) return;
     
     // Reset to original image
-    currentImage = originalImage;
+    if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
+        // When multiple images are uploaded, reset to the original for the current image
+        currentImage = originalImages[currentImageIndex];
+    } else {
+        currentImage = originalImage;
+    }
     
     // Clear canvas and draw original
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
     
     // Reset basic adjustment sliders
     document.getElementById('gamma-slider').value = 1;
@@ -836,6 +945,22 @@ function resetImage() {
     // Reset vessel enhancement
     document.getElementById('vessel-slider').value = 1.5;
     document.getElementById('vessel-value').textContent = '1.5';
+    
+    // Reset point processing technique sliders
+    document.getElementById('bit-plane-slider').value = 7;
+    document.getElementById('bit-plane-value').textContent = '7';
+    
+    document.getElementById('log-c-slider').value = 1;
+    document.getElementById('log-c-value').textContent = '1.0';
+    
+    document.getElementById('gray-min-slider').value = 100;
+    document.getElementById('gray-min-value').textContent = '100';
+    document.getElementById('gray-max-slider').value = 200;
+    document.getElementById('gray-max-value').textContent = '200';
+    document.getElementById('highlight-only-switch').checked = false;
+    
+    // Reset piecewise linear transform control points to default
+    updateControlPoints([[0, 0], [50, 100], [200, 150], [255, 255]]);
     
     // Reset color palette
     document.getElementById('palette-colors-slider').value = 5;
@@ -965,6 +1090,35 @@ function updateNavigationButtons() {
     nextBtn.disabled = currentImageIndex >= images.length - 1;
 }
 
+// Function to update control points in the UI for piecewise linear transform
+function updateControlPoints(points) {
+    // Clear existing points (except first and last)
+    const pointInputs = document.querySelectorAll('#piecewise-control-points .d-flex');
+    
+    // Keep only the first and last points (0,0 and 255,255)
+    for (let i = 1; i < pointInputs.length - 1; i++) {
+        pointInputs[i].remove();
+    }
+    
+    // Add new points
+    const container = document.getElementById('piecewise-control-points');
+    const lastPoint = pointInputs[pointInputs.length - 1];
+    
+    for (let i = 1; i < points.length - 1; i++) {
+        const [x, y] = points[i];
+        
+        const pointDiv = document.createElement('div');
+        pointDiv.className = 'd-flex align-items-center mb-1';
+        pointDiv.innerHTML = `
+            <small class="me-2">Point ${i+1}:</small>
+            <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="${x}">
+            <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="${y}">
+        `;
+        
+        container.insertBefore(pointDiv, lastPoint);
+    }
+}
+
 // Download current image
 function downloadImage() {
     if (!canvas) return;
@@ -995,20 +1149,29 @@ function downloadImage() {
     
     // Get base filename without extension
     let filename = 'picwizard-enhanced';
-    if (images.length > 0 && currentImageIndex >= 0) {
+    if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
         const currentFilename = images[currentImageIndex].filename;
         filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
     }
     
-    // Create download link
-    const link = document.createElement('a');
-    link.download = `${filename}-enhanced.${extension}`;
-    link.href = canvas.toDataURL(format, quality);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    console.log(`Downloading image in ${format} format with quality ${quality}`);
+    try {
+        // Create download link
+        const dataUrl = canvas.toDataURL(format, quality);
+        const link = document.createElement('a');
+        link.download = `${filename}-enhanced.${extension}`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up the link after a delay
+        setTimeout(() => {
+            document.body.removeChild(link);
+            console.log(`Downloaded image in ${format} format with quality ${quality}`);
+        }, 100);
+    } catch (error) {
+        console.error('Error downloading image:', error);
+        alert('Failed to download image: ' + error.message);
+    }
 }
 
 // Download all images as ZIP
@@ -1054,13 +1217,30 @@ function downloadAllImages() {
         // Add format and quality parameters
         formData.append('format', format.split('/')[1]); // 'png', 'jpeg', etc.
         formData.append('quality', quality.toString());
+        formData.append('method', 'gamma_correction'); // Default method for batch processing
+        formData.append('gamma', '1.0'); // Identity transform (no change)
         
         // Restore the previously displayed image
         displayImage(currentIndex);
         
-        // Send batch processing request
-        fetch('/download-zip', {
-            method: 'GET'
+        // First send batch processing request
+        fetch('/batch-enhance', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to process images for batch download');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Batch processing complete, downloading ZIP...');
+            
+            // Then download the ZIP file
+            return fetch('/download-zip', {
+                method: 'GET'
+            });
         })
         .then(response => {
             if (!response.ok) {

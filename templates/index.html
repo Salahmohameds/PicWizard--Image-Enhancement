@@ -245,6 +245,115 @@
                         </div>
                         
                         <div class="mb-3">
+                            <h6 class="card-subtitle mb-2">Point Processing Techniques</h6>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Bit-Plane Slicing</span>
+                                        <i class="bi bi-layers"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Bit Plane (0-7)</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="bit-plane-slider" min="0" max="7" step="1" value="7">
+                                            <span id="bit-plane-value" class="badge bg-secondary">7</span>
+                                        </div>
+                                        <div class="small text-info mt-1">
+                                            <i class="bi bi-info-circle"></i> Higher values (7) show most significant bits
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="bit-plane-btn">Apply Bit-Plane Slicing</button>
+                                </div>
+                                
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Log Transformation</span>
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Scaling Factor</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="log-c-slider" min="0.1" max="3" step="0.1" value="1">
+                                            <span id="log-c-value" class="badge bg-secondary">1.0</span>
+                                        </div>
+                                        <div class="small text-info mt-1">
+                                            <i class="bi bi-info-circle"></i> Expands dark pixels into wider range
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="log-transform-btn">Apply Log Transform</button>
+                                </div>
+                                
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Gray-Level Slicing</span>
+                                        <i class="bi bi-symmetry-vertical"></i>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Min Value</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="gray-min-slider" min="0" max="254" step="1" value="100">
+                                            <span id="gray-min-value" class="badge bg-secondary">100</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small">Max Value</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range" id="gray-max-slider" min="1" max="255" step="1" value="200">
+                                            <span id="gray-max-value" class="badge bg-secondary">200</span>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="highlight-only-switch">
+                                        <label class="form-check-label small" for="highlight-only-switch">Show only highlighted range</label>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="gray-level-btn">Apply Gray-Level Slicing</button>
+                                </div>
+                                
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span>Piecewise Linear Transform</span>
+                                        <i class="bi bi-bezier"></i>
+                                    </div>
+                                    <div id="piecewise-control-points" class="mb-2">
+                                        <label class="form-label small">Control Points</label>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <small class="me-2">Point 1:</small>
+                                            <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="0" disabled>
+                                            <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="0" disabled>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <small class="me-2">Point 2:</small>
+                                            <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="50">
+                                            <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="100">
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <small class="me-2">Point 3:</small>
+                                            <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="200">
+                                            <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="150">
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <small class="me-2">Point 4:</small>
+                                            <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="255" disabled>
+                                            <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="255" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown mb-2">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                                            Preset Transforms
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><button class="dropdown-item" data-preset="negative">Negative</button></li>
+                                            <li><button class="dropdown-item" data-preset="threshold">Threshold</button></li>
+                                            <li><button class="dropdown-item" data-preset="posterize">Posterize</button></li>
+                                            <li><button class="dropdown-item" data-preset="solarize">Solarize</button></li>
+                                        </ul>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary w-100 mt-2" id="piecewise-linear-btn">Apply Transform</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
                             <h6 class="card-subtitle mb-2">Color Adjustments</h6>
                             <div class="list-group">
                                 <div class="enhancement-tooltip">
