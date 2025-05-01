@@ -618,19 +618,28 @@ async function applyEnhancement(method, params = {}) {
             throw new Error(errorData.error || 'Failed to process image');
         }
         
-        // Get processed image
-        const processedBlob = await response.blob();
-        const img = await createImageBitmap(processedBlob);
-        
-        // Update current image
-        currentImage = img;
-        
-        // Draw processed image
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        // Update comparison slider
-        updateComparisonSlider();
+        // Handle color palette differently than regular image enhancements
+        if (method === 'extract_palette') {
+            // Get JSON with palette data instead of image
+            const paletteData = await response.json();
+            
+            // Display the color palette
+            displayColorPalette(paletteData.palette);
+        } else {
+            // Regular image processing - get the image blob as before
+            const processedBlob = await response.blob();
+            const img = await createImageBitmap(processedBlob);
+            
+            // Update current image
+            currentImage = img;
+            
+            // Draw processed image
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Update comparison slider
+            updateComparisonSlider();
+        }
     } catch (error) {
         console.error('Error applying enhancement:', error);
         let errorMessage = error.message || 'Unknown error occurred';
@@ -820,6 +829,56 @@ function resetImage() {
 }
 
 // Download processed image
+
+// Display the extracted color palette
+function displayColorPalette(paletteColors) {
+    // Get container elements
+    const paletteContainer = document.getElementById('color-palette-container');
+    const paletteDisplay = document.getElementById('color-palette-display');
+    
+    // Show the container
+    paletteContainer.style.display = 'block';
+    
+    // Clear any previous palette
+    paletteDisplay.innerHTML = '';
+    
+    // Create swatches for each color
+    paletteColors.forEach(hexColor => {
+        // Create color swatch
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = hexColor;
+        
+        // Add hex code label
+        const hexLabel = document.createElement('div');
+        hexLabel.className = 'hex-code';
+        hexLabel.textContent = hexColor;
+        swatch.appendChild(hexLabel);
+        
+        // Click to copy hex code
+        swatch.addEventListener('click', function() {
+            navigator.clipboard.writeText(hexColor)
+                .then(() => {
+                    // Show feedback
+                    const originalText = hexLabel.textContent;
+                    hexLabel.textContent = 'Copied!';
+                    hexLabel.style.opacity = 1;
+                    
+                    // Reset after a short delay
+                    setTimeout(() => {
+                        hexLabel.textContent = originalText;
+                        hexLabel.style.opacity = '';
+                    }, 1500);
+                })
+                .catch(err => {
+                    console.error('Could not copy text: ', err);
+                });
+        });
+        
+        // Add to palette display
+        paletteDisplay.appendChild(swatch);
+    });
+}
 
 // Image navigation setup
 function setupImageNavigation() {

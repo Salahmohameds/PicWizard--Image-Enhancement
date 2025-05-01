@@ -317,6 +317,29 @@
                                     </div>
                                     <button class="btn btn-sm btn-primary w-100 mt-2" id="sepia-btn">Apply Sepia Filter</button>
                                 </div>
+                                <div class="enhancement-tooltip">
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span>Color Palette</span>
+                                            <i class="bi bi-palette"></i>
+                                        </div>
+                                        <div class="tooltip-text">
+                                            <strong>AI Suggestion:</strong> Extract dominant colors from your image to create a color palette. Useful for designers or when you need to match colors with other elements.
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small">Number of Colors</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="range" class="form-range" id="palette-colors-slider" min="3" max="10" step="1" value="5">
+                                                <span id="palette-colors-value" class="badge bg-secondary">5</span>
+                                            </div>
+                                        </div>
+                                        <div id="color-palette-container" class="mb-3" style="display: none;">
+                                            <label class="form-label small">Extracted Colors</label>
+                                            <div class="color-palette-display" id="color-palette-display"></div>
+                                        </div>
+                                        <button class="btn btn-sm btn-primary w-100 mt-2" id="extract-palette-btn">Extract Color Palette</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
