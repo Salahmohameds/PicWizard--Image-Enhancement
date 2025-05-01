@@ -324,6 +324,30 @@ function setupEnhancementButtons() {
             applyEnhancement('sharpen', { strength });
         }, 300)();
     });
+    
+    // Set up download format change handler
+    const formatSelect = document.getElementById('download-format');
+    const qualityControl = document.getElementById('quality-control');
+    const qualitySlider = document.getElementById('quality-slider');
+    const qualityValue = document.getElementById('quality-value');
+    
+    // Show/hide quality slider based on format
+    formatSelect.addEventListener('change', function() {
+        const format = this.value;
+        if (format === 'image/jpeg' || format === 'image/webp') {
+            qualityControl.classList.remove('d-none');
+            qualityControl.classList.add('d-flex');
+        } else {
+            qualityControl.classList.add('d-none');
+            qualityControl.classList.remove('d-flex');
+        }
+    });
+    
+    // Update quality value display
+    qualitySlider.addEventListener('input', function() {
+        const value = Math.round(this.value * 100);
+        qualityValue.textContent = `${value}%`;
+    });
 }
 
 // Debounce function to limit the rate of function calls
@@ -610,13 +634,41 @@ function resetImage() {
 }
 
 // Download processed image
+
 function downloadImage() {
     if (!canvas) return;
     
+    // Get the selected format
+    const formatSelect = document.getElementById('download-format');
+    const format = formatSelect.value;
+    
+    // Set the appropriate file extension
+    let extension = 'png';
+    switch (format) {
+        case 'image/jpeg':
+            extension = 'jpg';
+            break;
+        case 'image/webp':
+            extension = 'webp';
+            break;
+        case 'image/bmp':
+            extension = 'bmp';
+            break;
+    }
+    
+    // Get quality setting for formats that support it
+    let quality = 1.0;
+    if (format === 'image/jpeg' || format === 'image/webp') {
+        quality = parseFloat(document.getElementById('quality-slider').value);
+    }
+    
+    // Create download link
     const link = document.createElement('a');
-    link.download = 'picwizard-enhanced.png';
-    link.href = canvas.toDataURL('image/png');
+    link.download = `picwizard-enhanced.${extension}`;
+    link.href = canvas.toDataURL(format, quality);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    console.log(`Downloading image in ${format} format with quality ${quality}`);
 }
