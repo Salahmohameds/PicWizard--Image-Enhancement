@@ -271,6 +271,19 @@ function setupCanvas(img) {
 
 // Enhancement Buttons Setup
 function setupEnhancementButtons() {
+    // Color Palette Extraction
+    document.getElementById('palette-colors-slider').addEventListener('input', function() {
+        document.getElementById('palette-colors-value').textContent = this.value;
+    });
+    
+    document.getElementById('extract-palette-btn').addEventListener('click', function() {
+        const numColors = parseInt(document.getElementById('palette-colors-slider').value);
+        applyEnhancement('extract_palette', { num_colors: numColors });
+    });
+    
+    // Hide palette when resetting image 
+    // (This is now handled directly in the resetImage function)
+    
     // Histogram Equalization
     document.getElementById('histogram-eq-btn').addEventListener('click', function() {
         applyEnhancement('histogram_equalization');
@@ -824,6 +837,11 @@ function resetImage() {
     document.getElementById('vessel-slider').value = 1.5;
     document.getElementById('vessel-value').textContent = '1.5';
     
+    // Reset color palette
+    document.getElementById('palette-colors-slider').value = 5;
+    document.getElementById('palette-colors-value').textContent = '5';
+    document.getElementById('color-palette-container').style.display = 'none';
+    
     // Update comparison slider
     updateComparisonSlider();
 }
@@ -923,6 +941,9 @@ function displayImage(index) {
         
         // Update filename display
         document.getElementById('current-filename').textContent = imageData.filename;
+        
+        // Hide color palette display when changing images
+        document.getElementById('color-palette-container').style.display = 'none';
     }
 }
 
