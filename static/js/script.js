@@ -33,8 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup image navigation
     setupImageNavigation();
     
-    // Setup download button
+    // Setup download buttons
     document.getElementById('download-btn').addEventListener('click', downloadImage);
+    document.getElementById('download-all-btn').addEventListener('click', downloadAllImages);
     
     // Setup reset button
     document.getElementById('reset-btn').addEventListener('click', resetImage);
@@ -609,6 +610,9 @@ function setupEnhancementButtons() {
         });
     });
     
+    // End of enhancement button setup
+}
+    
     // Apply piecewise linear transform
     document.getElementById('piecewise-linear-btn').addEventListener('click', function() {
         // Collect all point coordinates
@@ -1122,54 +1126,126 @@ function updateControlPoints(points) {
 function downloadImage() {
     if (!canvas) return;
     
-    try {
-        // Get the selected format
-        const formatSelect = document.getElementById('download-format');
-        const format = formatSelect.value;
-        
-        // Set the appropriate file extension
-        let extension = 'png';
-        switch (format) {
-            case 'image/jpeg':
-                extension = 'jpg';
-                break;
-            case 'image/webp':
-                extension = 'webp';
-                break;
-            case 'image/bmp':
-                extension = 'bmp';
-                break;
-        }
-        
-        // Get quality setting for formats that support it
-        let quality = 1.0;
-        if (format === 'image/jpeg' || format === 'image/webp') {
-            quality = parseFloat(document.getElementById('quality-slider').value);
-        }
-        
-        // Get base filename without extension
-        let filename = 'picwizard-enhanced';
-        if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
-            const currentFilename = images[currentImageIndex].filename;
-            filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
-        }
-        
-        // Show a message
-        console.log(`Preparing download in ${format} format with quality ${quality}`);
-        
-        // Simple direct download using HTML5 a.download attribute
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL(format, quality);
-        a.download = `${filename}-enhanced.${extension}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        console.log('Download initiated');
-    } catch (error) {
-        console.error('Error downloading image:', error);
-        alert('Failed to download image. Error: ' + error.message);
+    // Get the selected format
+    const formatSelect = document.getElementById('download-format');
+    const format = formatSelect.value;
+    
+    // Set the appropriate file extension
+    let extension = 'png';
+    switch (format) {
+        case 'image/jpeg':
+            extension = 'jpg';
+            break;
+        case 'image/webp':
+            extension = 'webp';
+            break;
+        case 'image/bmp':
+            extension = 'bmp';
+            break;
     }
+    
+    // Get quality setting for formats that support it
+    let quality = 1.0;
+    if (format === 'image/jpeg' || format === 'image/webp') {
+        quality = parseFloat(document.getElementById('quality-slider').value);
+    }
+    
+    // Get base filename without extension
+    let filename = 'picwizard-enhanced';
+    if (images.length > 0 && currentImageIndex >= 0) {
+        const currentFilename = images[currentImageIndex].filename;
+        filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
+    }
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.download = `${filename}-enhanced.${extension}`;
+    link.href = canvas.toDataURL(format, quality);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log(`Downloading image in ${format} format with quality ${quality}`);
+}
+
+// Download all images as ZIP
+function downloadAllImages() {
+    if (images.length === 0) {
+        alert('No images to download. Please upload and process images first.');
+        return;
+    }
+    
+    // Get format and quality settings
+    const formatSelect = document.getElementById('download-format');
+    const format = formatSelect.value;
+    const quality = parseFloat(document.getElementById('quality-slider').value);
+    
+    // Show processing indicator
+    const processingIndicator = document.getElementById('processing-indicator');
+    processingIndicator.style.display = 'block';
+    
+    // Create FormData for the batch request
+    const formData = new FormData();
+    
+    // Process each image and add to the batch
+    const currentIndex = currentImageIndex;
+    let batchPromises = [];
+    
+    // For each image, create a blob and add to formData
+    for (let i = 0; i < images.length; i++) {
+        // Switch to this image to capture its current state
+        displayImage(i);
+        
+        // Create a promise to process this image
+        batchPromises.push(new Promise((resolve) => {
+            // Get the canvas data for this image
+            const blob = dataURLToBlob(canvas.toDataURL(format, quality));
+            const file = new File([blob], images[i].filename, { type: format });
+            formData.append('images[]', file);
+            resolve();
+        }));
+    }
+    
+    // When all images are prepared, send the batch request
+    Promise.all(batchPromises).then(() => {
+        // Add format and quality parameters
+        formData.append('format', format.split('/')[1]); // 'png', 'jpeg', etc.
+        formData.append('quality', quality.toString());
+        
+        // Restore the previously displayed image
+        displayImage(currentIndex);
+        
+        // Send batch processing request
+        fetch('/download-zip', {
+            method: 'GET'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to download ZIP file');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Create download link for the ZIP
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'picwizard-enhanced-images.zip';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            processingIndicator.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error downloading ZIP:', error);
+            alert('Failed to download ZIP file: ' + error.message);
+            processingIndicator.style.display = 'none';
+        });
+    });
 }
 
 // Helper function to convert data URL to Blob
