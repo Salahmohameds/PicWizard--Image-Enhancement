@@ -33,9 +33,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup image navigation
     setupImageNavigation();
     
+    // Setup download options and format selection
+    setupDownloadOptions();
+    
     // Setup download buttons
     document.getElementById('download-btn').addEventListener('click', downloadImage);
     document.getElementById('download-all-btn').addEventListener('click', downloadAllImages);
+    
+    // Setup format selection handlers
+    const formatOptions = document.querySelectorAll('.format-option');
+    formatOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            selectFormat(this.getAttribute('data-format'));
+        });
+    });
     
     // Setup reset button
     document.getElementById('reset-btn').addEventListener('click', resetImage);
@@ -1116,6 +1127,65 @@ function updateControlPoints(points) {
         `;
         
         container.insertBefore(pointDiv, lastPoint);
+    }
+}
+
+// Function to set up download options
+function setupDownloadOptions() {
+    // Initialize quality slider visibility
+    const qualityControl = document.getElementById('quality-control');
+    const format = document.getElementById('download-format').value;
+    
+    if (format === 'image/jpeg' || format === 'image/webp') {
+        qualityControl.classList.remove('d-none');
+        qualityControl.classList.add('d-flex');
+    } else {
+        qualityControl.classList.remove('d-flex');
+        qualityControl.classList.add('d-none');
+    }
+    
+    // Set up quality slider value display
+    const qualitySlider = document.getElementById('quality-slider');
+    const qualityValue = document.getElementById('quality-value');
+    
+    qualitySlider.addEventListener('input', function() {
+        const value = Math.round(this.value * 100);
+        qualityValue.textContent = `${value}%`;
+    });
+}
+
+// Function to select a format from the dropdown
+function selectFormat(format) {
+    // Update the hidden select element
+    const formatSelect = document.getElementById('download-format');
+    formatSelect.value = format;
+    
+    // Update checkmarks in dropdown
+    document.querySelectorAll('.format-check').forEach(check => {
+        check.style.visibility = 'hidden';
+    });
+    
+    // Show checkmark for selected format
+    let formatId = '';
+    switch(format) {
+        case 'image/png': formatId = 'png-check'; break;
+        case 'image/jpeg': formatId = 'jpeg-check'; break;
+        case 'image/webp': formatId = 'webp-check'; break;
+        case 'image/bmp': formatId = 'bmp-check'; break;
+    }
+    
+    if (formatId) {
+        document.getElementById(formatId).style.visibility = 'visible';
+    }
+    
+    // Show/hide quality slider based on format
+    const qualityControl = document.getElementById('quality-control');
+    if (format === 'image/jpeg' || format === 'image/webp') {
+        qualityControl.classList.remove('d-none');
+        qualityControl.classList.add('d-flex');
+    } else {
+        qualityControl.classList.remove('d-flex');
+        qualityControl.classList.add('d-none');
     }
 }
 
