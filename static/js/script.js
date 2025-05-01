@@ -33,8 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup image navigation
     setupImageNavigation();
     
-    // Setup download button
+    // Setup download buttons
     document.getElementById('download-btn').addEventListener('click', downloadImage);
+    document.getElementById('download-all-btn').addEventListener('click', downloadAllImages);
     
     // Setup reset button
     document.getElementById('reset-btn').addEventListener('click', resetImage);
@@ -609,6 +610,35 @@ function setupEnhancementButtons() {
         });
     });
     
+    // Function to update control points in the UI
+    function updateControlPoints(points) {
+        // Clear existing points (except first and last)
+        const pointInputs = document.querySelectorAll('#piecewise-control-points .d-flex');
+        
+        // Keep only the first and last points (0,0 and 255,255)
+        for (let i = 1; i < pointInputs.length - 1; i++) {
+            pointInputs[i].remove();
+        }
+        
+        // Add new points
+        const container = document.getElementById('piecewise-control-points');
+        const lastPoint = pointInputs[pointInputs.length - 1];
+        
+        for (let i = 1; i < points.length - 1; i++) {
+            const [x, y] = points[i];
+            
+            const pointDiv = document.createElement('div');
+            pointDiv.className = 'd-flex align-items-center mb-1';
+            pointDiv.innerHTML = `
+                <small class="me-2">Point ${i+1}:</small>
+                <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="${x}">
+                <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="${y}">
+            `;
+            
+            container.insertBefore(pointDiv, lastPoint);
+        }
+    }
+    
     // Apply piecewise linear transform
     document.getElementById('piecewise-linear-btn').addEventListener('click', function() {
         // Collect all point coordinates
@@ -873,16 +903,11 @@ function resetImage() {
     if (!originalImage) return;
     
     // Reset to original image
-    if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
-        // When multiple images are uploaded, reset to the original for the current image
-        currentImage = originalImages[currentImageIndex];
-    } else {
-        currentImage = originalImage;
-    }
+    currentImage = originalImage;
     
     // Clear canvas and draw original
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
     
     // Reset basic adjustment sliders
     document.getElementById('gamma-slider').value = 1;
@@ -1089,74 +1114,130 @@ function updateNavigationButtons() {
     nextBtn.disabled = currentImageIndex >= images.length - 1;
 }
 
-// Function to update control points in the UI for piecewise linear transform
-function updateControlPoints(points) {
-    // Clear existing points (except first and last)
-    const pointInputs = document.querySelectorAll('#piecewise-control-points .d-flex');
-    
-    // Keep only the first and last points (0,0 and 255,255)
-    for (let i = 1; i < pointInputs.length - 1; i++) {
-        pointInputs[i].remove();
-    }
-    
-    // Add new points
-    const container = document.getElementById('piecewise-control-points');
-    const lastPoint = pointInputs[pointInputs.length - 1];
-    
-    for (let i = 1; i < points.length - 1; i++) {
-        const [x, y] = points[i];
-        
-        const pointDiv = document.createElement('div');
-        pointDiv.className = 'd-flex align-items-center mb-1';
-        pointDiv.innerHTML = `
-            <small class="me-2">Point ${i+1}:</small>
-            <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="${x}">
-            <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="${y}">
-        `;
-        
-        container.insertBefore(pointDiv, lastPoint);
-    }
-}
-
 // Download current image
 function downloadImage() {
-    if (!canvas) {
-        alert('No image to download. Please upload an image first.');
+    if (!canvas) return;
+    
+    // Get the selected format
+    const formatSelect = document.getElementById('download-format');
+    const format = formatSelect.value;
+    
+    // Set the appropriate file extension
+    let extension = 'png';
+    switch (format) {
+        case 'image/jpeg':
+            extension = 'jpg';
+            break;
+        case 'image/webp':
+            extension = 'webp';
+            break;
+        case 'image/bmp':
+            extension = 'bmp';
+            break;
+    }
+    
+    // Get quality setting for formats that support it
+    let quality = 1.0;
+    if (format === 'image/jpeg' || format === 'image/webp') {
+        quality = parseFloat(document.getElementById('quality-slider').value);
+    }
+    
+    // Get base filename without extension
+    let filename = 'picwizard-enhanced';
+    if (images.length > 0 && currentImageIndex >= 0) {
+        const currentFilename = images[currentImageIndex].filename;
+        filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
+    }
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.download = `${filename}-enhanced.${extension}`;
+    link.href = canvas.toDataURL(format, quality);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log(`Downloading image in ${format} format with quality ${quality}`);
+}
+
+// Download all images as ZIP
+function downloadAllImages() {
+    if (images.length === 0) {
+        alert('No images to download. Please upload and process images first.');
         return;
     }
     
-    try {
-        // Create a new window with the image data
-        const imageWindow = window.open();
-        if (!imageWindow) {
-            alert('Pop-up blocker may be preventing the download. Please allow pop-ups for this site.');
-            return;
-        }
+    // Get format and quality settings
+    const formatSelect = document.getElementById('download-format');
+    const format = formatSelect.value;
+    const quality = parseFloat(document.getElementById('quality-slider').value);
+    
+    // Show processing indicator
+    const processingIndicator = document.getElementById('processing-indicator');
+    processingIndicator.style.display = 'block';
+    
+    // Create FormData for the batch request
+    const formData = new FormData();
+    
+    // Process each image and add to the batch
+    const currentIndex = currentImageIndex;
+    let batchPromises = [];
+    
+    // For each image, create a blob and add to formData
+    for (let i = 0; i < images.length; i++) {
+        // Switch to this image to capture its current state
+        displayImage(i);
         
-        // Create an image element in the new window
-        const img = imageWindow.document.createElement('img');
-        img.src = canvas.toDataURL('image/png');
-        
-        // Add instructions
-        const instructions = imageWindow.document.createElement('p');
-        instructions.textContent = 'Right-click on the image and select "Save image as..." to download.';
-        instructions.style.textAlign = 'center';
-        instructions.style.fontFamily = 'Arial, sans-serif';
-        instructions.style.marginTop = '20px';
-        
-        // Add the image and instructions to the new window
-        imageWindow.document.body.style.margin = '0';
-        imageWindow.document.body.style.padding = '0';
-        imageWindow.document.body.style.textAlign = 'center';
-        imageWindow.document.body.style.backgroundColor = '#f0f0f0';
-        imageWindow.document.body.appendChild(img);
-        imageWindow.document.body.appendChild(instructions);
-        
-        console.log('Image opened in new window for download');
-    } catch (error) {
-        console.error('Error preparing image for download:', error);
-        alert('Failed to prepare image for download. Error: ' + error.message);
+        // Create a promise to process this image
+        batchPromises.push(new Promise((resolve) => {
+            // Get the canvas data for this image
+            const blob = dataURLToBlob(canvas.toDataURL(format, quality));
+            const file = new File([blob], images[i].filename, { type: format });
+            formData.append('images[]', file);
+            resolve();
+        }));
     }
+    
+    // When all images are prepared, send the batch request
+    Promise.all(batchPromises).then(() => {
+        // Add format and quality parameters
+        formData.append('format', format.split('/')[1]); // 'png', 'jpeg', etc.
+        formData.append('quality', quality.toString());
+        
+        // Restore the previously displayed image
+        displayImage(currentIndex);
+        
+        // Send batch processing request
+        fetch('/download-zip', {
+            method: 'GET'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to download ZIP file');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Create download link for the ZIP
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'picwizard-enhanced-images.zip';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            processingIndicator.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error downloading ZIP:', error);
+            alert('Failed to download ZIP file: ' + error.message);
+            processingIndicator.style.display = 'none';
+        });
+    });
 }
 
 // Helper function to convert data URL to Blob
