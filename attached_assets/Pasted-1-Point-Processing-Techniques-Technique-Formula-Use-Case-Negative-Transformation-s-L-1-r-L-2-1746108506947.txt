@@ -1,0 +1,53 @@
+1. Point Processing Techniques
+Technique	Formula	Use Case
+Negative Transformation	s = L-1 - r (L=255)	Medical imaging (highlight dark areas)
+Power-Law (Gamma)	s = c * r^γ	Adjust brightness (γ<1: brighten shadows; γ>1: darken highlights)
+Log Transformation	s = c * log(1 + r)	Expand dark pixels (rarely used)
+Thresholding	s = 255 if r > T else 0	Segmentation (isolate objects)
+2. Histogram Techniques
+Technique	Algorithm	Use Case
+Histogram Equalization	s_k = T(r_k) = Σ(P_r(r_j))	Improve contrast in low-contrast images
+Gray-Level Slicing	Highlight range [r1, r2]	Feature extraction (e.g., tumors in X-rays)
+3. Spatial Domain Techniques
+Technique	Implementation	Use Case
+Arithmetic Operations	img_avg = (img1 + img2) / 2	Noise reduction (image averaging)
+Logic Operations	AND/OR/NOT with binary masks	ROI selection (e.g., masking a tumor)
+🔥 Bonus Features (Stand Out)
+From Lecture 6 (Frequency Domain/Noise) and advanced concepts:
+
+1. Noise Reduction
+Gaussian Blur: cv2.GaussianBlur(img, (k,k), σ)
+
+Median Filtering: cv2.medianBlur(img, k) (removes salt-and-pepper noise)
+
+2. Frequency Domain Filtering
+DFT-Based Sharpening:
+
+python
+dft = cv2.dft(np.float32(img), flags=cv2.DFT_COMPLEX_OUTPUT) 
+dft_shift = np.fft.fftshift(dft) 
+# Apply high-pass filter (e.g., Butterworth) 
+rows, cols = img.shape 
+crow, ccol = rows//2, cols//2 
+mask = np.ones((rows, cols, 2), np.uint8) 
+mask[crow-30:crow+30, ccol-30:ccol+30] = 0  # Block low frequencies 
+fshift = dft_shift * mask 
+# Inverse DFT 
+img_enhanced = cv2.idft(np.fft.ifftshift(fshift)) 
+3. Interactive Tools
+Bit-Plane Slicing: Let users toggle bit planes (MSB to LSB) to visualize data hiding.
+
+Piecewise Linear Transform: Interactive UI to define custom intensity mappings.
+
+🚀 Advanced Extensions
+1. AI-Powered Enhancements
+Super-Resolution: Integrate ESRGAN (Python) to upscale images.
+
+Colorization: Use DeOldify to convert B&W images to color.
+
+2. Cloud Deployment
+Host the Flask backend on Replit/Heroku and use Firebase Storage for user uploads.
+
+3. Mobile Optimization
+Convert the frontend to a Progressive Web App (PWA) for mobile use.
+

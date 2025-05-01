@@ -5,6 +5,7 @@ import numpy as np
 import zipfile
 import uuid
 import time
+import json
 import shutil
 from flask import Flask, request, jsonify, send_file, render_template, session
 from io import BytesIO
@@ -126,6 +127,31 @@ def enhance():
                 'method': method,
                 'palette': palette
             })
+        elif method == 'bit_plane_slicing':
+            bit_plane = int(params.get('bit_plane', 7))
+            result = processor.bit_plane_slicing(img, bit_plane=bit_plane)
+        elif method == 'log_transformation':
+            c = float(params.get('c', 1.0))
+            result = processor.log_transformation(img, c=c)
+        elif method == 'gray_level_slicing':
+            min_val = int(params.get('min_val', 100))
+            max_val = int(params.get('max_val', 200))
+            highlight_only = params.get('highlight_only', 'false').lower() == 'true'
+            result = processor.gray_level_slicing(img, min_val=min_val, max_val=max_val, highlight_only=highlight_only)
+        elif method == 'piecewise_linear':
+            # Parse points from JSON string
+            points_str = params.get('points', '[[0,0],[128,128],[255,255]]')
+            try:
+                points = json.loads(points_str)
+                # Validate points
+                if not points or not all(isinstance(p, list) and len(p) == 2 for p in points):
+                    raise ValueError("Invalid points format")
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.error(f"Invalid points format: {e}")
+                # Default to identity transform
+                points = [[0, 0], [128, 128], [255, 255]]
+                
+            result = processor.piecewise_linear_transform(img, points)
         else:
             logger.error(f"Unknown method: {method}")
             return jsonify({"error": f"Unknown enhancement method: {method}"}), 400
@@ -237,6 +263,31 @@ def batch_enhance():
                 elif method == 'enhance_vessels':
                     strength = float(params.get('strength', 1.5))
                     result = processor.enhance_vessels(img, strength=strength)
+                elif method == 'bit_plane_slicing':
+                    bit_plane = int(params.get('bit_plane', 7))
+                    result = processor.bit_plane_slicing(img, bit_plane=bit_plane)
+                elif method == 'log_transformation':
+                    c = float(params.get('c', 1.0))
+                    result = processor.log_transformation(img, c=c)
+                elif method == 'gray_level_slicing':
+                    min_val = int(params.get('min_val', 100))
+                    max_val = int(params.get('max_val', 200))
+                    highlight_only = params.get('highlight_only', 'false').lower() == 'true'
+                    result = processor.gray_level_slicing(img, min_val=min_val, max_val=max_val, highlight_only=highlight_only)
+                elif method == 'piecewise_linear':
+                    # Parse points from JSON string
+                    points_str = params.get('points', '[[0,0],[128,128],[255,255]]')
+                    try:
+                        points = json.loads(points_str)
+                        # Validate points
+                        if not points or not all(isinstance(p, list) and len(p) == 2 for p in points):
+                            raise ValueError("Invalid points format")
+                    except (json.JSONDecodeError, ValueError) as e:
+                        logger.error(f"Invalid points format: {e}")
+                        # Default to identity transform
+                        points = [[0, 0], [128, 128], [255, 255]]
+                        
+                    result = processor.piecewise_linear_transform(img, points)
                 else:
                     logger.error(f"Unknown method: {method}")
                     return jsonify({"error": f"Unknown enhancement method: {method}"}), 400

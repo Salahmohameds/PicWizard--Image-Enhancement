@@ -365,3 +365,158 @@ class ImageProcessor:
                 palette.append(hex_color)
                 
         return palette
+        
+    def bit_plane_slicing(self, img, bit_plane=7):
+        """
+        Extract a specific bit plane from the image
+        
+        Args:
+            img: Input image
+            bit_plane: Which bit plane to extract (0-7, where 7 is MSB)
+            
+        Returns:
+            Image with only the specified bit plane visible
+        """
+        # Convert to grayscale if needed
+        if len(img.shape) == 3:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = img.copy()
+        
+        # Extract the bit plane
+        bit_img = np.zeros_like(gray)
+        rows, cols = gray.shape
+        
+        # Create the mask for the specified bit plane (2^bit_plane)
+        mask = 1 << bit_plane
+        
+        # Apply mask and normalize to 0 or 255
+        bit_img = (gray & mask) != 0
+        bit_img = bit_img.astype(np.uint8) * 255
+        
+        # Return the original image shape format
+        if len(img.shape) == 3:
+            return cv2.cvtColor(bit_img, cv2.COLOR_GRAY2BGR)
+        else:
+            return bit_img
+    
+    def log_transformation(self, img, c=1.0):
+        """
+        Apply logarithmic transformation to expand dark pixels
+        
+        Args:
+            img: Input image
+            c: Scaling constant
+            
+        Returns:
+            Log-transformed image
+        """
+        # Convert to float for log operation
+        img_float = img.astype(np.float32)
+        
+        # Apply log transform: s = c * log(1 + r)
+        # Adjust c to use the full dynamic range
+        if len(img.shape) == 3:
+            result = np.zeros_like(img_float)
+            for i in range(3):  # Apply to each channel
+                max_val = np.max(img_float[:,:,i])
+                if max_val > 0:  # Prevent division by zero
+                    c_adjusted = 255 / np.log(1 + max_val)
+                    result[:,:,i] = c_adjusted * np.log(1 + img_float[:,:,i])
+        else:
+            max_val = np.max(img_float)
+            if max_val > 0:  # Prevent division by zero
+                c_adjusted = 255 / np.log(1 + max_val)
+                result = c_adjusted * np.log(1 + img_float)
+            else:
+                result = img_float.copy()
+        
+        # Clip and convert back to uint8
+        result = np.clip(result, 0, 255).astype(np.uint8)
+        return result
+    
+    def gray_level_slicing(self, img, min_val=100, max_val=200, highlight_only=False):
+        """
+        Highlight a specific range of gray levels
+        
+        Args:
+            img: Input image
+            min_val: Minimum gray level to highlight
+            max_val: Maximum gray level to highlight
+            highlight_only: If True, only show highlighted pixels, otherwise show highlighted region over original image
+            
+        Returns:
+            Image with highlighted gray level range
+        """
+        # Convert to grayscale if needed
+        if len(img.shape) == 3:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = img.copy()
+        
+        # Create the mask for the specified range
+        mask = (gray >= min_val) & (gray <= max_val)
+        
+        # Create output image
+        if highlight_only:
+            # Only show highlighted pixels (white) on black background
+            result = np.zeros_like(gray)
+            result[mask] = 255
+        else:
+            # Show highlighted pixels (white) while keeping other pixels as original
+            result = gray.copy()
+            result[mask] = 255
+        
+        # Return the original image shape format
+        if len(img.shape) == 3:
+            return cv2.cvtColor(result, cv2.COLOR_GRAY2BGR)
+        else:
+            return result
+            
+    def piecewise_linear_transform(self, img, points):
+        """
+        Apply a piecewise linear transformation based on control points
+        
+        Args:
+            img: Input image
+            points: List of (x, y) control points defining the transformation
+                   where x is input intensity and y is output intensity
+                   Must include points (0, 0) and (255, 255) or similar range
+            
+        Returns:
+            Transformed image
+        """
+        # Convert to grayscale if needed
+        if len(img.shape) == 3:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = img.copy()
+            
+        # Sort points by x value
+        points.sort(key=lambda p: p[0])
+        
+        # Create lookup table
+        lut = np.zeros(256, dtype=np.uint8)
+        
+        # Fill lookup table based on linear interpolation between points
+        for i in range(len(points) - 1):
+            x1, y1 = points[i]
+            x2, y2 = points[i + 1]
+            
+            # Handle edge case
+            if x1 == x2:
+                continue
+                
+            # Linear interpolation for points between x1 and x2
+            for x in range(x1, x2 + 1):
+                y = y1 + (y2 - y1) * (x - x1) / (x2 - x1)
+                lut[x] = np.clip(int(y), 0, 255)
+        
+        # Apply the lookup table
+        result = cv2.LUT(gray, lut)
+        
+        # Return the original image shape format
+        if len(img.shape) == 3:
+            return cv2.cvtColor(result, cv2.COLOR_GRAY2BGR)
+        else:
+            return result
