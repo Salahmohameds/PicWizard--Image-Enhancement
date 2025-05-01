@@ -64,36 +64,13 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-image me-2" style="color: var(--primary-color);"></i>Image Preview</span>
                         <div class="d-flex align-items-center">
-                            <select class="form-select form-select-sm me-2" id="download-format" style="width: auto;">
-                                <option value="image/png" selected>PNG</option>
-                                <option value="image/jpeg">JPEG</option>
-                                <option value="image/webp">WebP</option>
-                                <option value="image/bmp">BMP</option>
-                            </select>
-                            <div id="quality-control" class="d-none d-flex align-items-center">
-                                <small class="me-1">Quality:</small>
-                                <input type="range" class="form-range me-1" id="quality-slider" min="0.1" max="1" step="0.1" value="0.9" style="width: 60px;">
-                                <span id="quality-value" class="badge bg-secondary">90%</span>
-                            </div>
                             <div class="btn-group">
                                 <button class="btn btn-sm btn-outline-secondary" id="reset-btn">
                                     <i class="bi bi-arrow-counterclockwise"></i> Reset
                                 </button>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-download"></i> Download
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="downloadDropdown">
-                                        <li><button class="dropdown-item" id="download-btn">Current Image</button></li>
-                                        <li><button class="dropdown-item" id="download-all-btn">All Images as ZIP</button></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><h6 class="dropdown-header">Share on Social Media</h6></li>
-                                        <li><button class="dropdown-item" id="twitter-share"><i class="bi bi-twitter me-2"></i>Twitter</button></li>
-                                        <li><button class="dropdown-item" id="facebook-share"><i class="bi bi-facebook me-2"></i>Facebook</button></li>
-                                        <li><button class="dropdown-item" id="pinterest-share"><i class="bi bi-pinterest me-2"></i>Pinterest</button></li>
-                                        <li><button class="dropdown-item" id="linkedin-share"><i class="bi bi-linkedin me-2"></i>LinkedIn</button></li>
-                                    </ul>
-                                </div>
+                                <button class="btn btn-sm btn-success" id="download-btn">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
                             </div>
                         </div>
                     </div>

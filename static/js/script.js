@@ -1119,46 +1119,25 @@ function updateControlPoints(points) {
     }
 }
 
-// Download current image
+// Download current image - simplified version that only downloads as PNG
 function downloadImage() {
-    if (!canvas) return;
-    
-    // Get the selected format
-    const formatSelect = document.getElementById('download-format');
-    const format = formatSelect.value;
-    
-    // Set the appropriate file extension
-    let extension = 'png';
-    switch (format) {
-        case 'image/jpeg':
-            extension = 'jpg';
-            break;
-        case 'image/webp':
-            extension = 'webp';
-            break;
-        case 'image/bmp':
-            extension = 'bmp';
-            break;
-    }
-    
-    // Get quality setting for formats that support it
-    let quality = 1.0;
-    if (format === 'image/jpeg' || format === 'image/webp') {
-        quality = parseFloat(document.getElementById('quality-slider').value);
-    }
-    
-    // Get base filename without extension
-    let filename = 'picwizard-enhanced';
-    if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
-        const currentFilename = images[currentImageIndex].filename;
-        filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
+    if (!canvas) {
+        alert('No image to download. Please upload an image first.');
+        return;
     }
     
     try {
-        // Create download link
-        const dataUrl = canvas.toDataURL(format, quality);
+        // Get base filename without extension
+        let filename = 'picwizard-enhanced';
+        if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
+            const currentFilename = images[currentImageIndex].filename;
+            filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
+        }
+        
+        // Create download link for PNG format
+        const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = `${filename}-enhanced.${extension}`;
+        link.download = `${filename}-enhanced.png`;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
@@ -1166,7 +1145,7 @@ function downloadImage() {
         // Clean up the link after a delay
         setTimeout(() => {
             document.body.removeChild(link);
-            console.log(`Downloaded image in ${format} format with quality ${quality}`);
+            console.log(`Downloaded image as PNG`);
         }, 100);
     } catch (error) {
         console.error('Error downloading image:', error);
