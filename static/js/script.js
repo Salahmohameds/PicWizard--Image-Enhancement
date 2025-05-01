@@ -610,34 +610,8 @@ function setupEnhancementButtons() {
         });
     });
     
-    // Function to update control points in the UI
-    function updateControlPoints(points) {
-        // Clear existing points (except first and last)
-        const pointInputs = document.querySelectorAll('#piecewise-control-points .d-flex');
-        
-        // Keep only the first and last points (0,0 and 255,255)
-        for (let i = 1; i < pointInputs.length - 1; i++) {
-            pointInputs[i].remove();
-        }
-        
-        // Add new points
-        const container = document.getElementById('piecewise-control-points');
-        const lastPoint = pointInputs[pointInputs.length - 1];
-        
-        for (let i = 1; i < points.length - 1; i++) {
-            const [x, y] = points[i];
-            
-            const pointDiv = document.createElement('div');
-            pointDiv.className = 'd-flex align-items-center mb-1';
-            pointDiv.innerHTML = `
-                <small class="me-2">Point ${i+1}:</small>
-                <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="${x}">
-                <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="${y}">
-            `;
-            
-            container.insertBefore(pointDiv, lastPoint);
-        }
-    }
+    // End of enhancement button setup
+}
     
     // Apply piecewise linear transform
     document.getElementById('piecewise-linear-btn').addEventListener('click', function() {
@@ -903,11 +877,16 @@ function resetImage() {
     if (!originalImage) return;
     
     // Reset to original image
-    currentImage = originalImage;
+    if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
+        // When multiple images are uploaded, reset to the original for the current image
+        currentImage = originalImages[currentImageIndex];
+    } else {
+        currentImage = originalImage;
+    }
     
     // Clear canvas and draw original
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
     
     // Reset basic adjustment sliders
     document.getElementById('gamma-slider').value = 1;
@@ -1112,6 +1091,35 @@ function updateNavigationButtons() {
     
     prevBtn.disabled = currentImageIndex <= 0;
     nextBtn.disabled = currentImageIndex >= images.length - 1;
+}
+
+// Function to update control points in the UI for piecewise linear transform
+function updateControlPoints(points) {
+    // Clear existing points (except first and last)
+    const pointInputs = document.querySelectorAll('#piecewise-control-points .d-flex');
+    
+    // Keep only the first and last points (0,0 and 255,255)
+    for (let i = 1; i < pointInputs.length - 1; i++) {
+        pointInputs[i].remove();
+    }
+    
+    // Add new points
+    const container = document.getElementById('piecewise-control-points');
+    const lastPoint = pointInputs[pointInputs.length - 1];
+    
+    for (let i = 1; i < points.length - 1; i++) {
+        const [x, y] = points[i];
+        
+        const pointDiv = document.createElement('div');
+        pointDiv.className = 'd-flex align-items-center mb-1';
+        pointDiv.innerHTML = `
+            <small class="me-2">Point ${i+1}:</small>
+            <input type="number" class="form-control form-control-sm me-1 point-x" min="0" max="255" value="${x}">
+            <input type="number" class="form-control form-control-sm point-y" min="0" max="255" value="${y}">
+        `;
+        
+        container.insertBefore(pointDiv, lastPoint);
+    }
 }
 
 // Download current image
