@@ -23,10 +23,10 @@
                     <div class="card-body upload-area" id="upload-area">
                         <div class="text-center py-5" id="upload-prompt">
                             <i class="bi bi-cloud-arrow-up fs-1"></i>
-                            <h5 class="mt-3">Drop your image here or click to browse</h5>
-                            <p class="text-muted small">Supports JPG and PNG formats</p>
-                            <input type="file" id="file-input" accept="image/jpeg, image/png" class="d-none">
-                            <button class="btn btn-outline-secondary mt-2" id="browse-btn">Choose Image</button>
+                            <h5 class="mt-3">Drop your images here or click to browse</h5>
+                            <p class="text-muted small">Supports JPG, PNG, WEBP, BMP, GIF, and TIFF formats</p>
+                            <input type="file" id="file-input" accept="image/jpeg, image/png, image/webp, image/bmp, image/gif, image/tiff" multiple class="d-none">
+                            <button class="btn btn-outline-secondary mt-2" id="browse-btn">Choose Images</button>
                         </div>
                     </div>
                 </div>
@@ -35,6 +35,26 @@
 
         <div class="row" id="editor-container" style="display: none;">
             <div class="col-md-8 mb-4">
+                <!-- Image navigation for multiple images -->
+                <div class="card bg-dark-subtle mb-3" id="images-navigation" style="display: none;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-primary rounded-pill" id="image-counter">1/1</span>
+                                <span class="ms-2" id="current-filename">filename.jpg</span>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" id="prev-image-btn" disabled>
+                                    <i class="bi bi-arrow-left"></i> Previous
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" id="next-image-btn" disabled>
+                                    Next <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="card bg-dark-subtle">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span>Image Preview</span>
@@ -54,9 +74,15 @@
                                 <button class="btn btn-sm btn-outline-secondary" id="reset-btn">
                                     <i class="bi bi-arrow-counterclockwise"></i> Reset
                                 </button>
-                                <button class="btn btn-sm btn-outline-success" id="download-btn">
-                                    <i class="bi bi-download"></i> Download
-                                </button>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-success dropdown-toggle" type="button" id="downloadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-download"></i> Download
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="downloadDropdown">
+                                        <li><button class="dropdown-item" id="download-btn">Current Image</button></li>
+                                        <li><button class="dropdown-item" id="download-all-btn">All Images as ZIP</button></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
