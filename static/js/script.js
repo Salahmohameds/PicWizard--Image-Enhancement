@@ -1149,20 +1149,29 @@ function downloadImage() {
     
     // Get base filename without extension
     let filename = 'picwizard-enhanced';
-    if (images.length > 0 && currentImageIndex >= 0) {
+    if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
         const currentFilename = images[currentImageIndex].filename;
         filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
     }
     
-    // Create download link
-    const link = document.createElement('a');
-    link.download = `${filename}-enhanced.${extension}`;
-    link.href = canvas.toDataURL(format, quality);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    console.log(`Downloading image in ${format} format with quality ${quality}`);
+    try {
+        // Create download link
+        const dataUrl = canvas.toDataURL(format, quality);
+        const link = document.createElement('a');
+        link.download = `${filename}-enhanced.${extension}`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up the link after a delay
+        setTimeout(() => {
+            document.body.removeChild(link);
+            console.log(`Downloaded image in ${format} format with quality ${quality}`);
+        }, 100);
+    } catch (error) {
+        console.error('Error downloading image:', error);
+        alert('Failed to download image: ' + error.message);
+    }
 }
 
 // Download all images as ZIP
@@ -1208,13 +1217,30 @@ function downloadAllImages() {
         // Add format and quality parameters
         formData.append('format', format.split('/')[1]); // 'png', 'jpeg', etc.
         formData.append('quality', quality.toString());
+        formData.append('method', 'gamma_correction'); // Default method for batch processing
+        formData.append('gamma', '1.0'); // Identity transform (no change)
         
         // Restore the previously displayed image
         displayImage(currentIndex);
         
-        // Send batch processing request
-        fetch('/download-zip', {
-            method: 'GET'
+        // First send batch processing request
+        fetch('/batch-enhance', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to process images for batch download');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Batch processing complete, downloading ZIP...');
+            
+            // Then download the ZIP file
+            return fetch('/download-zip', {
+                method: 'GET'
+            });
         })
         .then(response => {
             if (!response.ok) {
