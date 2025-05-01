@@ -5,6 +5,9 @@ let canvas = null;
 let ctx = null;
 let isDragging = false;
 let sliderPosition = 50;
+let images = []; // Array to store multiple uploaded images
+let originalImages = []; // Array to store original versions of all images
+let currentImageIndex = 0; // Index of the currently displayed image
 
 // DOM Elements
 document.addEventListener('DOMContentLoaded', function() {
@@ -24,8 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup comparison slider
     setupComparisonSlider();
     
-    // Setup download button
+    // Setup image navigation
+    setupImageNavigation();
+    
+    // Setup download buttons
     document.getElementById('download-btn').addEventListener('click', downloadImage);
+    document.getElementById('download-all-btn').addEventListener('click', downloadAllImages);
     
     // Setup reset button
     document.getElementById('reset-btn').addEventListener('click', resetImage);
@@ -52,8 +59,22 @@ function setupUploadHandler() {
     
     // Handle file selection
     fileInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-            processUploadedFile(this.files[0]);
+        if (this.files && this.files.length > 0) {
+            // Reset image arrays when new files are uploaded
+            images = [];
+            originalImages = [];
+            currentImageIndex = 0;
+            
+            // Process each file
+            for (let i = 0; i < this.files.length; i++) {
+                processUploadedFile(this.files[i], i === 0); // Only show the first image initially
+            }
+            
+            // Show the image navigation controls if multiple files are uploaded
+            if (this.files.length > 1) {
+                document.getElementById('images-navigation').style.display = 'block';
+                updateImageCounter();
+            }
         }
     });
     
@@ -71,19 +92,35 @@ function setupUploadHandler() {
         e.preventDefault();
         uploadArea.classList.remove('drag-over');
         
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            processUploadedFile(e.dataTransfer.files[0]);
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            // Reset image arrays when new files are dropped
+            images = [];
+            originalImages = [];
+            currentImageIndex = 0;
+            
+            // Process each file
+            for (let i = 0; i < e.dataTransfer.files.length; i++) {
+                processUploadedFile(e.dataTransfer.files[i], i === 0); // Only show the first image initially
+            }
+            
+            // Show the image navigation controls if multiple files are dropped
+            if (e.dataTransfer.files.length > 1) {
+                document.getElementById('images-navigation').style.display = 'block';
+                updateImageCounter();
+            }
         }
     });
 }
 
 // Process uploaded file
-function processUploadedFile(file) {
+function processUploadedFile(file, displayImage = true) {
     console.log("Processing file:", file.name, "Type:", file.type, "Size:", file.size);
     
     // Validate file type
-    if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
-        alert('Please upload a valid JPG or PNG image.');
+    if (!file.type.match('image/jpeg') && !file.type.match('image/png') && 
+        !file.type.match('image/webp') && !file.type.match('image/bmp') && 
+        !file.type.match('image/gif') && !file.type.match('image/tiff')) {
+        alert(`File ${file.name} is not a supported image format. Skipping.`);
         return;
     }
     
@@ -96,8 +133,8 @@ function processUploadedFile(file) {
         
         // Handle errors
         img.onerror = function() {
-            console.error("Failed to load image");
-            alert("Failed to load the image. Please try another file.");
+            console.error(`Failed to load image: ${file.name}`);
+            alert(`Failed to load the image: ${file.name}. Please try another file.`);
         };
         
         img.onload = function() {
@@ -109,18 +146,47 @@ function processUploadedFile(file) {
             // Update upload area
             const uploadArea = document.getElementById('upload-area');
             uploadArea.classList.add('has-image');
-            document.getElementById('upload-prompt').innerHTML = `
-                <i class="bi bi-check-circle-fill text-success fs-1"></i>
-                <h5 class="mt-3">Image uploaded successfully</h5>
-                <p class="small">Drag & drop or click to upload a different image</p>
-            `;
             
-            // Configure canvas
-            setupCanvas(img);
+            // Update upload prompt message based on number of files uploaded
+            if (images.length > 0) {
+                document.getElementById('upload-prompt').innerHTML = `
+                    <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                    <h5 class="mt-3">${images.length + 1} images uploaded</h5>
+                    <p class="small">Drag & drop or click to upload different images</p>
+                `;
+            } else {
+                document.getElementById('upload-prompt').innerHTML = `
+                    <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                    <h5 class="mt-3">Image uploaded successfully</h5>
+                    <p class="small">Drag & drop or click to upload more images</p>
+                `;
+            }
             
-            // Store original image
-            originalImage = img;
-            currentImage = img;
+            // Add this image to our arrays
+            images.push({
+                img: img,
+                filename: file.name,
+                originalSrc: e.target.result,
+                currentSrc: e.target.result
+            });
+            
+            // Create a clone of the original image to store
+            const originalImg = new Image();
+            originalImg.src = e.target.result;
+            originalImages.push(originalImg);
+            
+            // If this is the image we want to display, set it up
+            if (displayImage) {
+                // Configure canvas
+                setupCanvas(img);
+                
+                // Store as current active image
+                originalImage = img;
+                currentImage = img;
+                
+                // Update current filename display
+                document.getElementById('current-filename').textContent = file.name;
+            }
         };
         
         // Set image source from FileReader result
@@ -129,7 +195,7 @@ function processUploadedFile(file) {
     
     reader.onerror = function() {
         console.error("FileReader error:", reader.error);
-        alert("Failed to read the file. Please try again.");
+        alert(`Failed to read the file: ${file.name}. Please try again.`);
     };
     
     // Read file as data URL
@@ -712,6 +778,71 @@ function resetImage() {
 
 // Download processed image
 
+// Image navigation setup
+function setupImageNavigation() {
+    const prevBtn = document.getElementById('prev-image-btn');
+    const nextBtn = document.getElementById('next-image-btn');
+    
+    // Previous image button
+    prevBtn.addEventListener('click', function() {
+        if (currentImageIndex > 0) {
+            currentImageIndex--;
+            displayImage(currentImageIndex);
+            updateImageCounter();
+            updateNavigationButtons();
+        }
+    });
+    
+    // Next image button
+    nextBtn.addEventListener('click', function() {
+        if (currentImageIndex < images.length - 1) {
+            currentImageIndex++;
+            displayImage(currentImageIndex);
+            updateImageCounter();
+            updateNavigationButtons();
+        }
+    });
+}
+
+// Display image at specified index
+function displayImage(index) {
+    if (index >= 0 && index < images.length) {
+        const imageData = images[index];
+        
+        // Load the image
+        const img = imageData.img;
+        
+        // Setup canvas with this image
+        setupCanvas(img);
+        
+        // Update the current and original image references
+        currentImage = img;
+        originalImage = originalImages[index];
+        
+        // Update filename display
+        document.getElementById('current-filename').textContent = imageData.filename;
+    }
+}
+
+// Update image counter display
+function updateImageCounter() {
+    if (images.length > 0) {
+        document.getElementById('image-counter').textContent = `${currentImageIndex + 1}/${images.length}`;
+    } else {
+        document.getElementById('image-counter').textContent = '0/0';
+    }
+}
+
+// Update navigation buttons enabled/disabled state
+function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prev-image-btn');
+    const nextBtn = document.getElementById('next-image-btn');
+    
+    prevBtn.disabled = currentImageIndex <= 0;
+    nextBtn.disabled = currentImageIndex >= images.length - 1;
+}
+
+// Download current image
 function downloadImage() {
     if (!canvas) return;
     
@@ -739,13 +870,115 @@ function downloadImage() {
         quality = parseFloat(document.getElementById('quality-slider').value);
     }
     
+    // Get base filename without extension
+    let filename = 'picwizard-enhanced';
+    if (images.length > 0 && currentImageIndex >= 0) {
+        const currentFilename = images[currentImageIndex].filename;
+        filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
+    }
+    
     // Create download link
     const link = document.createElement('a');
-    link.download = `picwizard-enhanced.${extension}`;
+    link.download = `${filename}-enhanced.${extension}`;
     link.href = canvas.toDataURL(format, quality);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
     console.log(`Downloading image in ${format} format with quality ${quality}`);
+}
+
+// Download all images as ZIP
+function downloadAllImages() {
+    if (images.length === 0) {
+        alert('No images to download. Please upload and process images first.');
+        return;
+    }
+    
+    // Get format and quality settings
+    const formatSelect = document.getElementById('download-format');
+    const format = formatSelect.value;
+    const quality = parseFloat(document.getElementById('quality-slider').value);
+    
+    // Show processing indicator
+    const processingIndicator = document.getElementById('processing-indicator');
+    processingIndicator.style.display = 'block';
+    
+    // Create FormData for the batch request
+    const formData = new FormData();
+    
+    // Process each image and add to the batch
+    const currentIndex = currentImageIndex;
+    let batchPromises = [];
+    
+    // For each image, create a blob and add to formData
+    for (let i = 0; i < images.length; i++) {
+        // Switch to this image to capture its current state
+        displayImage(i);
+        
+        // Create a promise to process this image
+        batchPromises.push(new Promise((resolve) => {
+            // Get the canvas data for this image
+            const blob = dataURLToBlob(canvas.toDataURL(format, quality));
+            const file = new File([blob], images[i].filename, { type: format });
+            formData.append('images[]', file);
+            resolve();
+        }));
+    }
+    
+    // When all images are prepared, send the batch request
+    Promise.all(batchPromises).then(() => {
+        // Add format and quality parameters
+        formData.append('format', format.split('/')[1]); // 'png', 'jpeg', etc.
+        formData.append('quality', quality.toString());
+        
+        // Restore the previously displayed image
+        displayImage(currentIndex);
+        
+        // Send batch processing request
+        fetch('/download-zip', {
+            method: 'GET'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to download ZIP file');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Create download link for the ZIP
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'picwizard-enhanced-images.zip';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            processingIndicator.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error downloading ZIP:', error);
+            alert('Failed to download ZIP file: ' + error.message);
+            processingIndicator.style.display = 'none';
+        });
+    });
+}
+
+// Helper function to convert data URL to Blob
+function dataURLToBlob(dataURL) {
+    const parts = dataURL.split(';base64,');
+    const contentType = parts[0].split(':')[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+    
+    for (let i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+    }
+    
+    return new Blob([uInt8Array], { type: contentType });
 }

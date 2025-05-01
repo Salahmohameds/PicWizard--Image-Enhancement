@@ -1,3 +1,76 @@
+/* Custom theme colors */
+:root {
+  --primary-color: #6a64f1;
+  --primary-color-hover: #5a52e7;
+  --secondary-color: #4caf50;
+  --accent-color: #ff9800;
+  --dark-color: #1f2937;
+  --light-color: #f0f4f8;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --info-color: #3b82f6;
+}
+
+/* Global styles */
+body {
+  background-color: var(--dark-color);
+  color: var(--light-color);
+}
+
+.card {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
+}
+
+.btn-outline-primary {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.list-group-item {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.list-group-item-action:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* Upload area styling */
 .upload-area {
   min-height: 200px;
@@ -5,15 +78,17 @@
   border-radius: 5px;
   position: relative;
   transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .upload-area.drag-over {
-  border-color: var(--bs-primary);
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  border-color: var(--primary-color);
+  background-color: rgba(106, 100, 241, 0.1);
 }
 
 .upload-area.has-image {
   border-style: solid;
+  border-color: var(--success-color);
 }
 
 /* Canvas container */
@@ -40,7 +115,7 @@
   overflow: hidden;
   z-index: 1;
   pointer-events: none;
-  border-right: 2px solid var(--bs-primary);
+  border-right: 2px solid var(--primary-color);
 }
 
 .comparison-divider {
@@ -49,7 +124,7 @@
   bottom: 0;
   right: 0;
   width: 2px;
-  background-color: var(--bs-primary);
+  background-color: var(--primary-color);
   cursor: ew-resize;
   z-index: 2;
 }
@@ -62,14 +137,82 @@
   transform: translateY(-50%);
   width: 24px;
   height: 24px;
-  background-color: var(--bs-primary);
+  background-color: var(--primary-color);
   border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Processing indicator */
 #processing-indicator {
   z-index: 10;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   padding: 20px;
   border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Image navigation styling */
+#images-navigation {
+  background-color: rgba(106, 100, 241, 0.1);
+  border: 1px solid rgba(106, 100, 241, 0.2);
+  transition: all 0.3s ease;
+}
+
+#images-navigation:hover {
+  background-color: rgba(106, 100, 241, 0.15);
+}
+
+#image-counter {
+  background-color: var(--primary-color);
+  padding: 0.5em 0.8em;
+  font-weight: bold;
+}
+
+#current-filename {
+  color: var(--light-color);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+  display: inline-block;
+}
+
+/* Enhanced form controls */
+.form-range::-webkit-slider-thumb {
+  background: var(--primary-color);
+}
+
+.form-range::-moz-range-thumb {
+  background: var(--primary-color);
+}
+
+.form-range::-ms-thumb {
+  background: var(--primary-color);
+}
+
+.form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px var(--dark-color), 0 0 0 0.25rem rgba(106, 100, 241, 0.25);
+}
+
+.badge {
+  transition: all 0.2s ease;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(106, 100, 241, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(106, 100, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(106, 100, 241, 0);
+  }
+}
+
+.spinner-border {
+  animation: spinner-border 1s linear infinite, pulse 2s infinite;
 }
