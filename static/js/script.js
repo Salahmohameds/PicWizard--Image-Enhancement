@@ -1120,55 +1120,42 @@ function updateControlPoints(points) {
 
 // Download current image
 function downloadImage() {
-    if (!canvas) return;
+    if (!canvas) {
+        alert('No image to download. Please upload an image first.');
+        return;
+    }
     
     try {
-        // Get the selected format
-        const formatSelect = document.getElementById('download-format');
-        const format = formatSelect.value;
-        
-        // Set the appropriate file extension
-        let extension = 'png';
-        switch (format) {
-            case 'image/jpeg':
-                extension = 'jpg';
-                break;
-            case 'image/webp':
-                extension = 'webp';
-                break;
-            case 'image/bmp':
-                extension = 'bmp';
-                break;
+        // Create a new window with the image data
+        const imageWindow = window.open();
+        if (!imageWindow) {
+            alert('Pop-up blocker may be preventing the download. Please allow pop-ups for this site.');
+            return;
         }
         
-        // Get quality setting for formats that support it
-        let quality = 1.0;
-        if (format === 'image/jpeg' || format === 'image/webp') {
-            quality = parseFloat(document.getElementById('quality-slider').value);
-        }
+        // Create an image element in the new window
+        const img = imageWindow.document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
         
-        // Get base filename without extension
-        let filename = 'picwizard-enhanced';
-        if (images.length > 0 && currentImageIndex >= 0 && currentImageIndex < images.length) {
-            const currentFilename = images[currentImageIndex].filename;
-            filename = currentFilename.substring(0, currentFilename.lastIndexOf('.')) || currentFilename;
-        }
+        // Add instructions
+        const instructions = imageWindow.document.createElement('p');
+        instructions.textContent = 'Right-click on the image and select "Save image as..." to download.';
+        instructions.style.textAlign = 'center';
+        instructions.style.fontFamily = 'Arial, sans-serif';
+        instructions.style.marginTop = '20px';
         
-        // Show a message
-        console.log(`Preparing download in ${format} format with quality ${quality}`);
+        // Add the image and instructions to the new window
+        imageWindow.document.body.style.margin = '0';
+        imageWindow.document.body.style.padding = '0';
+        imageWindow.document.body.style.textAlign = 'center';
+        imageWindow.document.body.style.backgroundColor = '#f0f0f0';
+        imageWindow.document.body.appendChild(img);
+        imageWindow.document.body.appendChild(instructions);
         
-        // Simple direct download using HTML5 a.download attribute
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL(format, quality);
-        a.download = `${filename}-enhanced.${extension}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        console.log('Download initiated');
+        console.log('Image opened in new window for download');
     } catch (error) {
-        console.error('Error downloading image:', error);
-        alert('Failed to download image. Error: ' + error.message);
+        console.error('Error preparing image for download:', error);
+        alert('Failed to prepare image for download. Error: ' + error.message);
     }
 }
 
