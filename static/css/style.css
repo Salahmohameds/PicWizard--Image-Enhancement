@@ -382,3 +382,51 @@ body {
 .color-swatch:hover .hex-code {
   opacity: 1;
 }
+
+/* Point Processing Techniques */
+.point-x, .point-y {
+  width: 70px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* Piecewise Linear Transform */
+#piecewise-control-points {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Presets dropdown */
+.dropdown-item[data-preset] {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item[data-preset]:hover {
+  background-color: rgba(106, 100, 241, 0.1);
+}
+
+/* Bit Plane Slicing */
+.form-range::-webkit-slider-runnable-track {
+  background-color: rgba(255, 255, 255, 0.1); 
+}
+
+.form-range::-moz-range-track {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Form switch */
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Info tooltips */
+.small.text-info {
+  padding: 5px;
+  border-radius: 4px;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid var(--info-color);
+}
